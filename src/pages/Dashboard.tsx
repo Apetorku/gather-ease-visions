@@ -33,6 +33,9 @@ const Dashboard = () => {
             <Link to="/events">
               <Button variant="ghost">Events</Button>
             </Link>
+            <Link to="/admin">
+              <Button variant="ghost">Admin</Button>
+            </Link>
             <Button variant="glass" size="icon">
               <Settings className="w-5 h-5" />
             </Button>
