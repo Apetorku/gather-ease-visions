@@ -3,12 +3,57 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GlassCard } from "@/components/GlassCard";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User, Mail, Lock, Users, Building } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Signup = () => {
   const [role, setRole] = useState<"attendee" | "organizer" | null>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: name,
+            role: role,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        toast({
+          title: "Account created!",
+          description: "You can now sign in to your account.",
+        });
+        navigate("/login");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Signup failed",
+        description: error.message || "An error occurred during signup",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center p-4">
@@ -55,7 +100,7 @@ const Signup = () => {
               </button>
             </div>
           ) : (
-            <form className="space-y-4">
+            <form onSubmit={handleSignup} className="space-y-4">
               <div>
                 <Label htmlFor="name">Full Name</Label>
                 <div className="relative mt-2">
@@ -65,6 +110,9 @@ const Signup = () => {
                     type="text"
                     placeholder="John Doe"
                     className="pl-10 glass-card border-white/20"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
                   />
                 </div>
               </div>
@@ -78,6 +126,9 @@ const Signup = () => {
                     type="email"
                     placeholder="you@example.com"
                     className="pl-10 glass-card border-white/20"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
               </div>
@@ -91,12 +142,16 @@ const Signup = () => {
                     type="password"
                     placeholder="••••••••"
                     className="pl-10 glass-card border-white/20"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
                   />
                 </div>
               </div>
 
-              <Button variant="gradient" className="w-full" size="lg">
-                Create Account as {role === "attendee" ? "Attendee" : "Organizer"}
+              <Button variant="gradient" className="w-full" size="lg" type="submit" disabled={loading}>
+                {loading ? "Creating Account..." : `Create Account as ${role === "attendee" ? "Attendee" : "Organizer"}`}
               </Button>
 
               <button

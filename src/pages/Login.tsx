@@ -1,12 +1,50 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GlassCard } from "@/components/GlassCard";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in.",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid email or password",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center p-4">
       <motion.div
@@ -23,7 +61,7 @@ const Login = () => {
         <GlassCard className="p-8">
           <h2 className="text-2xl font-bold text-center mb-6">Welcome Back</h2>
 
-          <form className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
               <div className="relative mt-2">
@@ -33,6 +71,9 @@ const Login = () => {
                   type="email"
                   placeholder="you@example.com"
                   className="pl-10 glass-card border-white/20"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -46,6 +87,9 @@ const Login = () => {
                   type="password"
                   placeholder="••••••••"
                   className="pl-10 glass-card border-white/20"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -56,8 +100,8 @@ const Login = () => {
               </Link>
             </div>
 
-            <Button variant="gradient" className="w-full" size="lg">
-              Login
+            <Button variant="gradient" className="w-full" size="lg" type="submit" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
 
