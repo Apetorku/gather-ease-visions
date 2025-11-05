@@ -5,13 +5,57 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart3, Users, Calendar, Ticket, Settings, 
   MessageSquare, QrCode, FileText, TrendingUp, 
-  UserCog, Plus, Edit, Copy, RefreshCw 
+  UserCog, Plus, Edit, Copy, RefreshCw, Check, X 
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [pendingEvents, setPendingEvents] = useState([
+    { id: 1, name: "Tech Summit 2025", organizer: "John Doe", date: "March 15, 2025", status: "pending" },
+    { id: 2, name: "Music Festival", organizer: "Jane Smith", date: "April 10, 2025", status: "pending" },
+  ]);
+  const [pendingAdmins, setPendingAdmins] = useState([
+    { id: 1, name: "Alice Johnson", email: "alice@example.com", status: "pending" },
+    { id: 2, name: "Bob Wilson", email: "bob@example.com", status: "pending" },
+  ]);
+
+  const approveEvent = (eventId: number) => {
+    setPendingEvents(pendingEvents.filter(e => e.id !== eventId));
+    toast({
+      title: "Event Approved",
+      description: "The event is now publicly listed.",
+    });
+  };
+
+  const rejectEvent = (eventId: number) => {
+    setPendingEvents(pendingEvents.filter(e => e.id !== eventId));
+    toast({
+      title: "Event Rejected",
+      description: "The event has been rejected.",
+      variant: "destructive",
+    });
+  };
+
+  const approveAdmin = (adminId: number) => {
+    setPendingAdmins(pendingAdmins.filter(a => a.id !== adminId));
+    toast({
+      title: "Admin Approved",
+      description: "New admin access has been granted.",
+    });
+  };
+
+  const rejectAdmin = (adminId: number) => {
+    setPendingAdmins(pendingAdmins.filter(a => a.id !== adminId));
+    toast({
+      title: "Admin Rejected",
+      description: "Admin request has been rejected.",
+      variant: "destructive",
+    });
+  };
 
   const stats = [
     { label: "Total Events", value: "24", icon: Calendar, change: "+12%" },
@@ -67,12 +111,28 @@ const Admin = () => {
         {/* Admin Tabs */}
         <GlassCard className="p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-6">
+            <TabsList className="grid grid-cols-2 lg:grid-cols-7 gap-2 mb-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="events">Events</TabsTrigger>
+              <TabsTrigger value="approvals" className="relative">
+                Approvals
+                {pendingEvents.length > 0 && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {pendingEvents.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="attendees">Attendees</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="team">Team</TabsTrigger>
+              <TabsTrigger value="admin-requests" className="relative">
+                Admin Requests
+                {pendingAdmins.length > 0 && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {pendingAdmins.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
@@ -113,6 +173,51 @@ const Admin = () => {
                     </GlassCard>
                   </div>
                 </div>
+              </div>
+            </TabsContent>
+
+            {/* Event Approvals Tab */}
+            <TabsContent value="approvals">
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold mb-4">Pending Event Approvals</h2>
+                <GlassCard className="p-6">
+                  {pendingEvents.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No pending events to approve</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {pendingEvents.map((event) => (
+                        <div key={event.id} className="flex items-center justify-between p-4 rounded-lg bg-white/5">
+                          <div className="flex-1">
+                            <div className="font-semibold text-lg">{event.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              Organizer: {event.organizer} • Date: {event.date}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => approveEvent(event.id)}
+                              className="bg-green-500/10 hover:bg-green-500/20 border-green-500/50"
+                            >
+                              <Check className="w-4 h-4 mr-1 text-green-500" />
+                              Approve
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => rejectEvent(event.id)}
+                              className="bg-red-500/10 hover:bg-red-500/20 border-red-500/50"
+                            >
+                              <X className="w-4 h-4 mr-1 text-red-500" />
+                              Reject
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </GlassCard>
               </div>
             </TabsContent>
 
@@ -235,6 +340,54 @@ const Admin = () => {
                     </div>
                   </GlassCard>
                 </div>
+              </div>
+            </TabsContent>
+
+            {/* Admin Requests Tab */}
+            <TabsContent value="admin-requests">
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold mb-4">Pending Admin Requests</h2>
+                <GlassCard className="p-6">
+                  {pendingAdmins.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No pending admin requests</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {pendingAdmins.map((admin) => (
+                        <div key={admin.id} className="flex items-center justify-between p-4 rounded-lg bg-white/5">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold">
+                              {admin.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="font-semibold">{admin.name}</div>
+                              <div className="text-sm text-muted-foreground">{admin.email}</div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => approveAdmin(admin.id)}
+                              className="bg-green-500/10 hover:bg-green-500/20 border-green-500/50"
+                            >
+                              <Check className="w-4 h-4 mr-1 text-green-500" />
+                              Approve
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => rejectAdmin(admin.id)}
+                              className="bg-red-500/10 hover:bg-red-500/20 border-red-500/50"
+                            >
+                              <X className="w-4 h-4 mr-1 text-red-500" />
+                              Reject
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </GlassCard>
               </div>
             </TabsContent>
 
