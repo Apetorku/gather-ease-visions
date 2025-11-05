@@ -9,6 +9,7 @@ import EventDetail from "./pages/EventDetail";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import OrganizerDashboard from "./pages/OrganizerDashboard";
 import Admin from "./pages/Admin";
 import AttendeeProfile from "./pages/AttendeeProfile";
 import MyTickets from "./pages/MyTickets";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/create-event" element={<CreateEvent />} />
           <Route path="/profile" element={<AttendeeProfile />} />

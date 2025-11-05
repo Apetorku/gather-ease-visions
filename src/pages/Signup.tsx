@@ -38,6 +38,9 @@ const Signup = () => {
       if (error) throw error;
 
       if (data.user) {
+        // Store role in localStorage
+        localStorage.setItem('userRole', role || 'attendee');
+        
         toast({
           title: "Account created!",
           description: "You can now sign in to your account.",

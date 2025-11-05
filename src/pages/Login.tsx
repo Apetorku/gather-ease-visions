@@ -29,11 +29,25 @@ const Login = () => {
       if (error) throw error;
 
       if (data.user) {
+        // Get user role from metadata
+        const userRole = data.user.user_metadata?.role || 'attendee';
+        
+        // Store role in localStorage for frontend access
+        localStorage.setItem('userRole', userRole);
+        
         toast({
           title: "Welcome back!",
           description: "You have successfully logged in.",
         });
-        navigate("/dashboard");
+
+        // Redirect based on role
+        if (userRole === 'admin') {
+          navigate("/admin");
+        } else if (userRole === 'organizer') {
+          navigate("/organizer-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
       toast({
