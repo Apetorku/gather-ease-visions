@@ -332,8 +332,8 @@ const MyTickets = () => {
                   <span>Browse Events</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

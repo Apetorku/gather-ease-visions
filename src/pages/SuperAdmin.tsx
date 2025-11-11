@@ -40,6 +40,8 @@ import {
   Eye,
   EyeOff,
   Trash2,
+  LogOut,
+  User,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -122,6 +124,14 @@ const SuperAdmin = () => {
     permissions: [] as string[],
   });
 
+  // Platform settings state
+  const [platformSettings, setPlatformSettings] = useState({
+    twoFactorAuth: false,
+    sessionTimeout: "30",
+    autoApproval: false,
+    maintenanceMode: false,
+  });
+
   // Check Super Admin authentication
   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
@@ -137,6 +147,31 @@ const SuperAdmin = () => {
       navigate("/dashboard");
     }
   }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userSession");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userEmail");
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out",
+    });
+    navigate("/", { replace: true });
+  };
+
+  const handleDashboardClick = () => {
+    const userRole = localStorage.getItem("userRole");
+    console.log("🔍 SuperAdmin - Current user role:", userRole);
+    console.log("🔍 SuperAdmin - Already on superadmin dashboard");
+    
+    // Already on super admin dashboard, scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast({
+      title: "Already on Dashboard",
+      description: "You're viewing the super admin panel",
+    });
+  };
 
   const [admins, setAdmins] = useState<Admin[]>([
     {
@@ -443,13 +478,55 @@ const SuperAdmin = () => {
             </div>
           </Link>
           <nav className="flex items-center gap-4">
-            <Link to="/dashboard">
-              <Button variant="ghost">Dashboard</Button>
+            <Link to="/events">
+              <Button variant="ghost">Browse Events</Button>
             </Link>
-            <Button variant="glass">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </Button>
+            
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="glass" size="icon" className="relative">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src="https://api.dicebear.com/7.x/initials/svg?seed=SuperAdmin"
+                    />
+                    <AvatarFallback>
+                      <Crown className="h-4 w-4 text-yellow-500" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none flex items-center gap-1">
+                      <Crown className="w-3 h-3 text-yellow-500" />
+                      Super Admin
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {localStorage.getItem("userEmail")}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDashboardClick}>
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/events")}>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  <span>Browse Events</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
         </div>
       </header>
@@ -720,11 +797,21 @@ const SuperAdmin = () => {
                         <DropdownMenuContent align="end" className="w-56">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {
+                            toast({
+                              title: "Admin Details",
+                              description: `Viewing details for ${admin.name}`,
+                            });
+                          }}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {
+                            toast({
+                              title: "Edit Permissions",
+                              description: `Opening permission editor for ${admin.name}`,
+                            });
+                          }}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Permissions
                           </DropdownMenuItem>
@@ -908,8 +995,23 @@ const SuperAdmin = () => {
                           Require 2FA for all admins
                         </p>
                       </div>
-                      <Button variant="outline" size="sm">
-                        Enable
+                      <Button 
+                        variant={platformSettings.twoFactorAuth ? "default" : "outline"} 
+                        size="sm"
+                        onClick={() => {
+                          setPlatformSettings({
+                            ...platformSettings,
+                            twoFactorAuth: !platformSettings.twoFactorAuth,
+                          });
+                          toast({
+                            title: platformSettings.twoFactorAuth ? "2FA Disabled" : "2FA Enabled",
+                            description: platformSettings.twoFactorAuth 
+                              ? "Two-factor authentication has been disabled" 
+                              : "Two-factor authentication is now required for all admins",
+                          });
+                        }}
+                      >
+                        {platformSettings.twoFactorAuth ? "Enabled" : "Disabled"}
                       </Button>
                     </div>
                     <div className="flex items-center justify-between">
@@ -919,7 +1021,19 @@ const SuperAdmin = () => {
                           Auto logout after inactivity
                         </p>
                       </div>
-                      <Select defaultValue="30">
+                      <Select 
+                        value={platformSettings.sessionTimeout}
+                        onValueChange={(value) => {
+                          setPlatformSettings({
+                            ...platformSettings,
+                            sessionTimeout: value,
+                          });
+                          toast({
+                            title: "Session Timeout Updated",
+                            description: `Session timeout set to ${value === "never" ? "never expire" : `${value} minutes`}`,
+                          });
+                        }}
+                      >
                         <SelectTrigger className="w-32">
                           <SelectValue />
                         </SelectTrigger>
@@ -946,8 +1060,23 @@ const SuperAdmin = () => {
                           Automatically approve events from verified organizers
                         </p>
                       </div>
-                      <Button variant="outline" size="sm">
-                        Disabled
+                      <Button 
+                        variant={platformSettings.autoApproval ? "default" : "outline"} 
+                        size="sm"
+                        onClick={() => {
+                          setPlatformSettings({
+                            ...platformSettings,
+                            autoApproval: !platformSettings.autoApproval,
+                          });
+                          toast({
+                            title: platformSettings.autoApproval ? "Auto-Approval Disabled" : "Auto-Approval Enabled",
+                            description: platformSettings.autoApproval
+                              ? "Events now require manual approval"
+                              : "Verified organizer events will be auto-approved",
+                          });
+                        }}
+                      >
+                        {platformSettings.autoApproval ? "Enabled" : "Disabled"}
                       </Button>
                     </div>
                     <div className="flex items-center justify-between">
@@ -957,8 +1086,24 @@ const SuperAdmin = () => {
                           Put platform into maintenance mode
                         </p>
                       </div>
-                      <Button variant="outline" size="sm">
-                        Off
+                      <Button 
+                        variant={platformSettings.maintenanceMode ? "destructive" : "outline"} 
+                        size="sm"
+                        onClick={() => {
+                          setPlatformSettings({
+                            ...platformSettings,
+                            maintenanceMode: !platformSettings.maintenanceMode,
+                          });
+                          toast({
+                            title: platformSettings.maintenanceMode ? "Maintenance Mode Off" : "Maintenance Mode On",
+                            description: platformSettings.maintenanceMode
+                              ? "Platform is now accessible to all users"
+                              : "Platform is now in maintenance mode",
+                            variant: platformSettings.maintenanceMode ? "default" : "destructive",
+                          });
+                        }}
+                      >
+                        {platformSettings.maintenanceMode ? "ON" : "OFF"}
                       </Button>
                     </div>
                   </div>
@@ -966,16 +1111,61 @@ const SuperAdmin = () => {
 
                 <div className="glass-card p-4">
                   <h3 className="font-semibold mb-2">Database Management</h3>
-                  <div className="flex gap-3">
-                    <Button variant="outline">
+                  <div className="flex gap-3 flex-wrap">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        toast({
+                          title: "Database Backup Started",
+                          description: "Creating a backup of the database...",
+                        });
+                        // Simulate backup process
+                        setTimeout(() => {
+                          toast({
+                            title: "Backup Complete",
+                            description: "Database backup saved successfully",
+                          });
+                        }, 2000);
+                      }}
+                    >
                       <Database className="w-4 h-4 mr-2" />
                       Backup Database
                     </Button>
-                    <Button variant="outline">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        toast({
+                          title: "Clearing Cache",
+                          description: "Platform cache is being cleared...",
+                        });
+                        // Simulate cache clear
+                        setTimeout(() => {
+                          toast({
+                            title: "Cache Cleared",
+                            description: "All cached data has been removed",
+                          });
+                        }, 1500);
+                      }}
+                    >
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Clear Cache
                     </Button>
-                    <Button variant="outline">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        toast({
+                          title: "Exporting Logs",
+                          description: "Preparing system logs for download...",
+                        });
+                        // Simulate log export
+                        setTimeout(() => {
+                          toast({
+                            title: "Export Complete",
+                            description: "System logs downloaded successfully",
+                          });
+                        }, 1500);
+                      }}
+                    >
                       <FileText className="w-4 h-4 mr-2" />
                       Export Logs
                     </Button>

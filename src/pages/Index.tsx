@@ -216,11 +216,18 @@ const Index = () => {
           </p>
           {!loading &&
             (isLoggedIn ? (
-              <Link to="/create-event">
-                <Button variant="gradient" size="lg">
-                  Create Your First Event
+              userRole === "organizer" ? (
+                <Link to="/organizer/create-event">
+                  <Button variant="gradient" size="lg">
+                    Create Your First Event
+                  </Button>
+                </Link>
+              ) : (
+                <Button variant="gradient" size="lg" onClick={handleDashboardClick}>
+                  <LayoutDashboard className="w-5 h-5 mr-2" />
+                  Go to Dashboard
                 </Button>
-              </Link>
+              )
             ) : (
               <Link to="/signup">
                 <Button variant="gradient" size="lg">

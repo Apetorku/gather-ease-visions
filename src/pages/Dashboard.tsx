@@ -277,10 +277,6 @@ const Dashboard = () => {
                   <Calendar className="mr-2 h-4 w-4" />
                   <span>Browse Events</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
@@ -304,7 +300,7 @@ const Dashboard = () => {
         >
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
             <div>
-              <h2 className="text-4xl font-bold mb-2">Welcome back!</h2>
+              <h2 className="text-4xl font-bold mb-2">Welcome back, {userName}!</h2>
               <p className="text-muted-foreground">
                 Here's what's happening with your events
               </p>

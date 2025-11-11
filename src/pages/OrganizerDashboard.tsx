@@ -172,6 +172,36 @@ const OrganizerDashboard = () => {
     navigate("/", { replace: true });
   };
 
+  const handleDashboardClick = () => {
+    const userRole = localStorage.getItem("userRole");
+    console.log("🔍 OrganizerDashboard - Current user role:", userRole);
+    console.log("🔍 OrganizerDashboard - localStorage:", {
+      userRole: localStorage.getItem("userRole"),
+      userName: localStorage.getItem("userName"),
+      userEmail: localStorage.getItem("userEmail"),
+    });
+    
+    // Redirect based on user role
+    if (userRole === "superadmin") {
+      console.log("✅ Navigating to /superadmin");
+      navigate("/superadmin");
+    } else if (userRole === "admin") {
+      console.log("✅ Navigating to /admin");
+      navigate("/admin");
+    } else if (userRole === "organizer") {
+      console.log("✅ Staying on /organizer-dashboard");
+      // Already on organizer dashboard, could scroll to top or refresh
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      toast({
+        title: "Already on Dashboard",
+        description: "You're viewing the organizer dashboard",
+      });
+    } else {
+      console.log("✅ Navigating to /dashboard (default)");
+      navigate("/dashboard"); // Default to attendee dashboard
+    }
+  };
+
   const openEventCheckIn = (event: any) => {
     toast({
       title: "Opening Check-In",
@@ -301,7 +331,7 @@ const OrganizerDashboard = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                <DropdownMenuItem onClick={handleDashboardClick}>
                   <User className="mr-2 h-4 w-4" />
                   <span>My Dashboard</span>
                 </DropdownMenuItem>
@@ -310,8 +340,8 @@ const OrganizerDashboard = () => {
                   <span>Browse Events</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

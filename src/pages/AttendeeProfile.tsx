@@ -39,14 +39,43 @@ const AttendeeProfile = () => {
   const [userName, setUserName] = useState("User");
   const [userEmail, setUserEmail] = useState("user@example.com");
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Profile form states
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
+  const [bio, setBio] = useState("");
+  
+  // ALL useState hooks must be declared before any conditional returns
+  const [notifications, setNotifications] = useState({
+    newEvents: true,
+    reminders: true,
+    updates: false,
+    newsletter: true,
+  });
+
+  const [selectedInterests, setSelectedInterests] = useState([
+    "Technology",
+    "Business",
+    "Networking",
+  ]);
 
   // Check authentication on mount
   useEffect(() => {
+    console.log("🔍 AttendeeProfile - Checking authentication...");
     const userSession = localStorage.getItem("userSession");
     const storedUserName = localStorage.getItem("userName");
     const storedUserEmail = localStorage.getItem("userEmail");
     
+    console.log("🔍 AttendeeProfile - Auth check:", {
+      userSession: userSession,
+      storedUserName: storedUserName,
+      storedUserEmail: storedUserEmail,
+    });
+    
     if (!userSession) {
+      console.log("❌ AttendeeProfile - No session found, redirecting to login");
       toast({
         title: "Access Denied",
         description: "Please login to view your profile",
@@ -56,10 +85,33 @@ const AttendeeProfile = () => {
       return;
     }
     
+    console.log("✅ AttendeeProfile - Authentication successful, loading profile");
     setUserName(storedUserName || "User");
     setUserEmail(storedUserEmail || "user@example.com");
+    
+    // Parse name into first and last name
+    const nameParts = (storedUserName || "User").split(" ");
+    setFirstName(nameParts[0] || "");
+    setLastName(nameParts.slice(1).join(" ") || "");
+    
+    // Load saved profile data from localStorage if available
+    const savedProfile = localStorage.getItem("userProfile");
+    if (savedProfile) {
+      try {
+        const profileData = JSON.parse(savedProfile);
+        setPhone(profileData.phone || "");
+        setLocation(profileData.location || "");
+        setBio(profileData.bio || "");
+        if (profileData.selectedInterests) {
+          setSelectedInterests(profileData.selectedInterests);
+        }
+      } catch (e) {
+        console.error("Error loading profile data:", e);
+      }
+    }
+    
     setIsLoading(false);
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleLogout = () => {
     localStorage.removeItem("userSession");
@@ -98,6 +150,51 @@ const AttendeeProfile = () => {
     }
   };
 
+  const handleSaveProfile = () => {
+    // Update userName in localStorage
+    const fullName = `${firstName} ${lastName}`.trim();
+    localStorage.setItem("userName", fullName);
+    setUserName(fullName);
+    
+    // Save profile data
+    const profileData = {
+      phone,
+      location,
+      bio,
+      selectedInterests,
+    };
+    localStorage.setItem("userProfile", JSON.stringify(profileData));
+    
+    toast({
+      title: "Profile Updated",
+      description: "Your profile has been successfully updated",
+    });
+  };
+
+  const handleSavePreferences = () => {
+    const profileData = {
+      phone,
+      location,
+      bio,
+      selectedInterests,
+    };
+    localStorage.setItem("userProfile", JSON.stringify(profileData));
+    
+    toast({
+      title: "Preferences Saved",
+      description: "Your event preferences have been saved",
+    });
+  };
+
+  const handleSaveNotifications = () => {
+    localStorage.setItem("userNotifications", JSON.stringify(notifications));
+    
+    toast({
+      title: "Settings Saved",
+      description: "Your notification settings have been updated",
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center">
@@ -109,13 +206,7 @@ const AttendeeProfile = () => {
     );
   }
 
-  const [notifications, setNotifications] = useState({
-    newEvents: true,
-    reminders: true,
-    updates: false,
-    newsletter: true,
-  });
-
+  // Constants - can be defined after the loading check
   const interests = [
     "Technology",
     "Music",
@@ -126,12 +217,6 @@ const AttendeeProfile = () => {
     "Networking",
     "Education",
   ];
-
-  const [selectedInterests, setSelectedInterests] = useState([
-    "Technology",
-    "Business",
-    "Networking",
-  ]);
 
   const upcomingEvents = [
     {
@@ -244,8 +329,8 @@ const AttendeeProfile = () => {
                   <span>Browse Events</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -273,16 +358,18 @@ const AttendeeProfile = () => {
                 <div className="text-center mb-6">
                   <div className="relative inline-block mb-4">
                     <Avatar className="w-32 h-32">
-                      <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" />
-                      <AvatarFallback>JD</AvatarFallback>
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`} />
+                      <AvatarFallback>
+                        {firstName.charAt(0)}{lastName.charAt(0) || firstName.charAt(1)}
+                      </AvatarFallback>
                     </Avatar>
                     <button className="absolute bottom-0 right-0 p-2 rounded-full bg-gradient-to-br from-primary to-accent text-white">
                       <Camera className="w-4 h-4" />
                     </button>
                   </div>
-                  <h2 className="text-2xl font-bold mb-1">John Doe</h2>
+                  <h2 className="text-2xl font-bold mb-1">{userName || "User"}</h2>
                   <p className="text-muted-foreground mb-4">
-                    john.doe@example.com
+                    {userEmail}
                   </p>
                   <Badge variant="secondary">Verified Attendee</Badge>
                 </div>
@@ -290,16 +377,20 @@ const AttendeeProfile = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center gap-3 text-sm">
                     <Mail className="w-4 h-4 text-muted-foreground" />
-                    <span>john.doe@example.com</span>
+                    <span>{userEmail}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <span>+1 (555) 123-4567</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <span>San Francisco, CA</span>
-                  </div>
+                  {phone && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <Phone className="w-4 h-4 text-muted-foreground" />
+                      <span>{phone}</span>
+                    </div>
+                  )}
+                  {location && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <MapPin className="w-4 h-4 text-muted-foreground" />
+                      <span>{location}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3 text-sm">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
                     <span>Member since Jan 2024</span>
@@ -365,7 +456,8 @@ const AttendeeProfile = () => {
                           <Label htmlFor="firstName">First Name</Label>
                           <Input
                             id="firstName"
-                            defaultValue="John"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
                             className="mt-2 glass-card border-white/20"
                           />
                         </div>
@@ -373,7 +465,8 @@ const AttendeeProfile = () => {
                           <Label htmlFor="lastName">Last Name</Label>
                           <Input
                             id="lastName"
-                            defaultValue="Doe"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
                             className="mt-2 glass-card border-white/20"
                           />
                         </div>
@@ -382,15 +475,18 @@ const AttendeeProfile = () => {
                           <Input
                             id="email"
                             type="email"
-                            defaultValue="john.doe@example.com"
-                            className="mt-2 glass-card border-white/20"
+                            value={userEmail}
+                            disabled
+                            className="mt-2 glass-card border-white/20 opacity-50"
                           />
                         </div>
                         <div>
                           <Label htmlFor="phone">Phone</Label>
                           <Input
                             id="phone"
-                            defaultValue="+1 (555) 123-4567"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="+1 (555) 123-4567"
                             className="mt-2 glass-card border-white/20"
                           />
                         </div>
@@ -398,7 +494,9 @@ const AttendeeProfile = () => {
                           <Label htmlFor="location">Location</Label>
                           <Input
                             id="location"
-                            defaultValue="San Francisco, CA"
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                            placeholder="San Francisco, CA"
                             className="mt-2 glass-card border-white/20"
                           />
                         </div>
@@ -406,13 +504,14 @@ const AttendeeProfile = () => {
                           <Label htmlFor="bio">Bio</Label>
                           <Textarea
                             id="bio"
+                            value={bio}
+                            onChange={(e) => setBio(e.target.value)}
                             placeholder="Tell us about yourself..."
                             className="mt-2 glass-card border-white/20 min-h-24"
-                            defaultValue="Tech enthusiast and event lover. Always looking for new experiences and networking opportunities."
                           />
                         </div>
                       </div>
-                      <Button variant="gradient" className="mt-6">
+                      <Button variant="gradient" className="mt-6" onClick={handleSaveProfile}>
                         Save Changes
                       </Button>
                     </div>
@@ -530,7 +629,7 @@ const AttendeeProfile = () => {
                           </Badge>
                         ))}
                       </div>
-                      <Button variant="gradient" className="mt-6">
+                      <Button variant="gradient" className="mt-6" onClick={handleSavePreferences}>
                         Save Preferences
                       </Button>
                     </div>
@@ -619,7 +718,7 @@ const AttendeeProfile = () => {
                           />
                         </div>
                       </div>
-                      <Button variant="gradient" className="mt-6">
+                      <Button variant="gradient" className="mt-6" onClick={handleSaveNotifications}>
                         Save Settings
                       </Button>
                     </div>

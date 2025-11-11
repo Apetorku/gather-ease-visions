@@ -49,6 +49,41 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [userName, setUserName] = useState("Admin");
   const [isLoading, setIsLoading] = useState(true);
+  
+  // ALL useState hooks must be declared BEFORE any conditional returns
+  const [pendingEvents, setPendingEvents] = useState([
+    {
+      id: 1,
+      name: "Tech Summit 2025",
+      organizer: "John Doe",
+      date: "March 15, 2025",
+      status: "pending",
+    },
+    {
+      id: 2,
+      name: "Music Festival",
+      organizer: "Jane Smith",
+      date: "April 10, 2025",
+      status: "pending",
+    },
+  ]);
+  
+  const [pendingAdmins, setPendingAdmins] = useState([
+    {
+      id: 1,
+      name: "Alice Johnson",
+      email: "alice@example.com",
+      status: "pending",
+    },
+    { id: 2, name: "Bob Wilson", email: "bob@example.com", status: "pending" },
+  ]);
+
+  // Platform settings state
+  const [platformSettings, setPlatformSettings] = useState({
+    eventAutoApproval: false,
+    emailNotifications: true,
+    maintenanceMode: false,
+  });
 
   // Check authentication and role on mount
   useEffect(() => {
@@ -94,6 +129,36 @@ const Admin = () => {
     navigate("/", { replace: true });
   };
 
+  const handleDashboardClick = () => {
+    const userRole = localStorage.getItem("userRole");
+    console.log("🔍 Admin - Current user role:", userRole);
+    console.log("🔍 Admin - localStorage:", {
+      userRole: localStorage.getItem("userRole"),
+      userName: localStorage.getItem("userName"),
+      userEmail: localStorage.getItem("userEmail"),
+    });
+    
+    // Redirect based on user role
+    if (userRole === "superadmin") {
+      console.log("✅ Navigating to /superadmin");
+      navigate("/superadmin");
+    } else if (userRole === "admin") {
+      console.log("✅ Staying on /admin");
+      // Already on admin dashboard, could scroll to top or refresh
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      toast({
+        title: "Already on Dashboard",
+        description: "You're viewing the admin panel",
+      });
+    } else if (userRole === "organizer") {
+      console.log("✅ Navigating to /organizer-dashboard");
+      navigate("/organizer-dashboard");
+    } else {
+      console.log("✅ Navigating to /dashboard (default)");
+      navigate("/dashboard"); // Default to attendee dashboard
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center">
@@ -104,32 +169,6 @@ const Admin = () => {
       </div>
     );
   }
-
-  const [pendingEvents, setPendingEvents] = useState([
-    {
-      id: 1,
-      name: "Tech Summit 2025",
-      organizer: "John Doe",
-      date: "March 15, 2025",
-      status: "pending",
-    },
-    {
-      id: 2,
-      name: "Music Festival",
-      organizer: "Jane Smith",
-      date: "April 10, 2025",
-      status: "pending",
-    },
-  ]);
-  const [pendingAdmins, setPendingAdmins] = useState([
-    {
-      id: 1,
-      name: "Alice Johnson",
-      email: "alice@example.com",
-      status: "pending",
-    },
-    { id: 2, name: "Bob Wilson", email: "bob@example.com", status: "pending" },
-  ]);
 
   const approveEvent = (eventId: number) => {
     setPendingEvents(pendingEvents.filter((e) => e.id !== eventId));
@@ -216,7 +255,7 @@ const Admin = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                <DropdownMenuItem onClick={handleDashboardClick}>
                   <User className="mr-2 h-4 w-4" />
                   <span>My Dashboard</span>
                 </DropdownMenuItem>
@@ -225,8 +264,8 @@ const Admin = () => {
                   <span>Browse Events</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -283,17 +322,7 @@ const Admin = () => {
               <TabsTrigger value="attendees">Attendees</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="team">Team</TabsTrigger>
-              <TabsTrigger value="admin-requests" className="relative">
-                Admin Requests
-                {pendingAdmins.length > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                  >
-                    {pendingAdmins.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
@@ -504,9 +533,10 @@ const Admin = () => {
                         variant="glass"
                         className="h-20 flex flex-col gap-2 text-sm"
                         onClick={() => {
+                          setActiveTab("settings");
                           toast({
-                            title: "System Settings",
-                            description: "Configure platform settings.",
+                            title: "Platform Settings",
+                            description: "Opening platform configuration.",
                           });
                         }}
                       >
@@ -600,63 +630,6 @@ const Admin = () => {
               </div>
             </TabsContent>
 
-            {/* Admin Requests Tab */}
-            <TabsContent value="admin-requests">
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold mb-4">
-                  Pending Admin Requests
-                </h2>
-                <GlassCard className="p-6">
-                  {pendingAdmins.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">
-                      No pending admin requests
-                    </p>
-                  ) : (
-                    <div className="space-y-4">
-                      {pendingAdmins.map((admin) => (
-                        <div
-                          key={admin.id}
-                          className="flex items-center justify-between p-4 rounded-lg bg-white/5"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold">
-                              {admin.name.charAt(0)}
-                            </div>
-                            <div>
-                              <div className="font-semibold">{admin.name}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {admin.email}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => approveAdmin(admin.id)}
-                              className="bg-green-500/10 hover:bg-green-500/20 border-green-500/50"
-                            >
-                              <Check className="w-4 h-4 mr-1 text-green-500" />
-                              Approve
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => rejectAdmin(admin.id)}
-                              className="bg-red-500/10 hover:bg-red-500/20 border-red-500/50"
-                            >
-                              <X className="w-4 h-4 mr-1 text-red-500" />
-                              Reject
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </GlassCard>
-              </div>
-            </TabsContent>
-
             {/* Team Management Tab */}
             <TabsContent value="team">
               <div className="space-y-6">
@@ -716,6 +689,147 @@ const Admin = () => {
                   </div>
                 </GlassCard>
               </div>
+            </TabsContent>
+
+            {/* Settings Tab */}
+            <TabsContent value="settings">
+              <GlassCard className="p-6">
+                <h2 className="text-2xl font-bold mb-4">Platform Settings</h2>
+                <p className="text-muted-foreground mb-6">
+                  Configure platform-wide settings and preferences
+                </p>
+
+                <div className="space-y-6">
+                  <div className="glass-card p-4">
+                    <h3 className="font-semibold mb-2">Event Management</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">
+                            Event Auto-Approval
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Automatically approve events from verified organizers
+                          </p>
+                        </div>
+                        <Button 
+                          variant={platformSettings.eventAutoApproval ? "default" : "outline"} 
+                          size="sm"
+                          onClick={() => {
+                            setPlatformSettings({
+                              ...platformSettings,
+                              eventAutoApproval: !platformSettings.eventAutoApproval,
+                            });
+                            toast({
+                              title: platformSettings.eventAutoApproval ? "Auto-Approval Disabled" : "Auto-Approval Enabled",
+                              description: platformSettings.eventAutoApproval
+                                ? "Events now require manual approval"
+                                : "Verified organizer events will be auto-approved",
+                            });
+                          }}
+                        >
+                          {platformSettings.eventAutoApproval ? "Enabled" : "Disabled"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-4">
+                    <h3 className="font-semibold mb-2">Notifications</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Email Notifications</p>
+                          <p className="text-xs text-muted-foreground">
+                            Send email notifications to users for important updates
+                          </p>
+                        </div>
+                        <Button 
+                          variant={platformSettings.emailNotifications ? "default" : "outline"} 
+                          size="sm"
+                          onClick={() => {
+                            setPlatformSettings({
+                              ...platformSettings,
+                              emailNotifications: !platformSettings.emailNotifications,
+                            });
+                            toast({
+                              title: platformSettings.emailNotifications ? "Emails Disabled" : "Emails Enabled",
+                              description: platformSettings.emailNotifications
+                                ? "Email notifications have been turned off"
+                                : "Email notifications are now enabled",
+                            });
+                          }}
+                        >
+                          {platformSettings.emailNotifications ? "Enabled" : "Disabled"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-4">
+                    <h3 className="font-semibold mb-2">Platform Status</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Maintenance Mode</p>
+                          <p className="text-xs text-muted-foreground">
+                            Put platform into maintenance mode for updates
+                          </p>
+                        </div>
+                        <Button 
+                          variant={platformSettings.maintenanceMode ? "destructive" : "outline"} 
+                          size="sm"
+                          onClick={() => {
+                            setPlatformSettings({
+                              ...platformSettings,
+                              maintenanceMode: !platformSettings.maintenanceMode,
+                            });
+                            toast({
+                              title: platformSettings.maintenanceMode ? "Maintenance Mode Off" : "Maintenance Mode On",
+                              description: platformSettings.maintenanceMode
+                                ? "Platform is now accessible to all users"
+                                : "Platform is now in maintenance mode",
+                              variant: platformSettings.maintenanceMode ? "default" : "destructive",
+                            });
+                          }}
+                        >
+                          {platformSettings.maintenanceMode ? "ON" : "OFF"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-4">
+                    <h3 className="font-semibold mb-2">System Actions</h3>
+                    <div className="flex gap-3 flex-wrap">
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          toast({
+                            title: "Cache Cleared",
+                            description: "Platform cache has been cleared successfully",
+                          });
+                        }}
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Clear Cache
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          toast({
+                            title: "Backup Started",
+                            description: "Database backup is being created...",
+                          });
+                        }}
+                      >
+                        <Copy className="w-4 h-4 mr-2" />
+                        Backup Database
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </GlassCard>
             </TabsContent>
           </Tabs>
         </GlassCard>
