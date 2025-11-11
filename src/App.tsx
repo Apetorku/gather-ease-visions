@@ -11,9 +11,12 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
 import Admin from "./pages/Admin";
+import SuperAdmin from "./pages/SuperAdmin";
 import AttendeeProfile from "./pages/AttendeeProfile";
 import MyTickets from "./pages/MyTickets";
 import CreateEvent from "./pages/CreateEvent";
+import CheckInStation from "./pages/CheckInStation";
+import AttendeeListManager from "./pages/AttendeeListManager";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,7 +36,11 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/superadmin" element={<SuperAdmin />} />
           <Route path="/admin/create-event" element={<CreateEvent />} />
+          <Route path="/organizer/create-event" element={<CreateEvent />} />
+          <Route path="/organizer/check-in" element={<CheckInStation />} />
+          <Route path="/organizer/attendees" element={<AttendeeListManager />} />
           <Route path="/profile" element={<AttendeeProfile />} />
           <Route path="/my-tickets" element={<MyTickets />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

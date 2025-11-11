@@ -54,9 +54,6 @@ const CreateEvent = () => {
             </h1>
           </Link>
           <nav className="flex items-center gap-4">
-            <Link to="/admin">
-              <Button variant="ghost">Admin Panel</Button>
-            </Link>
             <Button variant="outline">
               <Eye className="w-4 h-4 mr-2" />
               Preview
@@ -343,7 +340,9 @@ const CreateEvent = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
                   <div>
-                    <p className="font-semibold mb-1">Require Registration Approval</p>
+                    <p className="font-semibold mb-1">
+                      Require Registration Approval
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       Manually approve each registration
                     </p>
@@ -363,7 +362,9 @@ const CreateEvent = () => {
 
                 <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
                   <div>
-                    <p className="font-semibold mb-1">Send Reminder Notifications</p>
+                    <p className="font-semibold mb-1">
+                      Send Reminder Notifications
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       Automatically notify attendees before the event
                     </p>

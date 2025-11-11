@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GlassCard } from "@/components/GlassCard";
@@ -21,15 +21,6 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Search,
   Calendar,
@@ -40,16 +31,11 @@ import {
   Share2,
   Bell,
   SlidersHorizontal,
-  User,
-  LogOut,
-  Settings,
-  Ticket,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const Events = () => {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
@@ -58,74 +44,6 @@ const Events = () => {
   const [favoriteEvents, setFavoriteEvents] = useState<number[]>([]);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [sortBy, setSortBy] = useState("date");
-  const [showNotifications, setShowNotifications] = useState(false);
-
-  // Check if user is logged in (using localStorage for demo)
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("Guest");
-
-  // Mock notifications data
-  const notifications = [
-    {
-      id: 1,
-      title: "New event in your area",
-      message: "Tech Summit 2025 is happening near you!",
-      time: "2 hours ago",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Ticket confirmation",
-      message: "Your ticket for Design Workshop has been confirmed",
-      time: "1 day ago",
-      read: true,
-    },
-    {
-      id: 3,
-      title: "Event reminder",
-      message: "Music Festival starts in 3 days",
-      time: "2 days ago",
-      read: true,
-    },
-  ];
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  useEffect(() => {
-    // Check localStorage for user session
-    const userSession = localStorage.getItem("userSession");
-    const storedUserName = localStorage.getItem("userName");
-
-    if (userSession) {
-      setIsLoggedIn(true);
-      setUserName(storedUserName || "User");
-    }
-  }, []);
-
-  const handleDashboardClick = () => {
-    const userRole = localStorage.getItem("userRole");
-    
-    // Redirect based on user role
-    if (userRole === "superadmin") {
-      navigate("/superadmin");
-    } else if (userRole === "admin") {
-      navigate("/admin");
-    } else if (userRole === "organizer") {
-      navigate("/organizer-dashboard");
-    } else {
-      navigate("/dashboard"); // Default to attendee dashboard
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("userSession");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userEmail");
-    setIsLoggedIn(false);
-    setUserName("Guest");
-    navigate("/");
-  };
 
   const categories = [
     "All",
@@ -276,137 +194,12 @@ const Events = () => {
             </h1>
           </Link>
           <nav className="flex items-center gap-4">
-            {isLoggedIn ? (
-              <>
-                <Button variant="ghost" onClick={handleDashboardClick}>
-                  Dashboard
-                </Button>
-                <Link to="/my-tickets">
-                  <Button variant="ghost" className="hidden sm:flex">
-                    <Ticket className="w-4 h-4 mr-2" />
-                    My Tickets
-                  </Button>
-                </Link>
-
-                {/* Notification Bell */}
-                <DropdownMenu
-                  open={showNotifications}
-                  onOpenChange={setShowNotifications}
-                >
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="glass" size="icon" className="relative">
-                      <Bell className="h-5 w-5" />
-                      {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
-                          {unreadCount}
-                        </span>
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-80">
-                    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.length > 0 ? (
-                        notifications.map((notification) => (
-                          <DropdownMenuItem
-                            key={notification.id}
-                            className={`flex flex-col items-start p-4 ${
-                              !notification.read ? "bg-primary/5" : ""
-                            }`}
-                          >
-                            <div className="flex items-start justify-between w-full">
-                              <div className="flex-1">
-                                <p className="font-semibold text-sm">
-                                  {notification.title}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {notification.message}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-2">
-                                  {notification.time}
-                                </p>
-                              </div>
-                              {!notification.read && (
-                                <div className="w-2 h-2 rounded-full bg-blue-500 ml-2 mt-1" />
-                              )}
-                            </div>
-                          </DropdownMenuItem>
-                        ))
-                      ) : (
-                        <div className="p-4 text-center text-muted-foreground">
-                          No notifications
-                        </div>
-                      )}
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="w-full text-center justify-center">
-                      <span className="text-sm text-primary">
-                        View all notifications
-                      </span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* User Menu Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="glass" size="icon" className="relative">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName}`}
-                        />
-                        <AvatarFallback>
-                          <User className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {userName}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          Signed in
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate("/profile")}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/my-tickets")}>
-                      <Ticket className="mr-2 h-4 w-4" />
-                      <span>My Tickets</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDashboardClick}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="text-red-600"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <>
-                <Link to="/login">
-                  <Button variant="ghost">Login</Button>
-                </Link>
-                <Link to="/signup">
-                  <Button variant="gradient">Sign Up</Button>
-                </Link>
-              </>
-            )}
+            <Link to="/dashboard">
+              <Button variant="ghost">Dashboard</Button>
+            </Link>
+            <Link to="/login">
+              <Button variant="glass">Login</Button>
+            </Link>
           </nav>
         </div>
       </header>

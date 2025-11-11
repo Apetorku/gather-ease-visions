@@ -38,14 +38,38 @@ const Signup = () => {
       if (error) throw error;
 
       if (data.user) {
-        // Store role in localStorage
-        localStorage.setItem('userRole', role || 'attendee');
-        
-        toast({
-          title: "Account created!",
-          description: "You can now sign in to your account.",
-        });
-        navigate("/login");
+        // Store session, role, and name in localStorage
+        if (data.session) {
+          // User is auto-logged in after signup
+          localStorage.setItem("userSession", data.session.access_token);
+          localStorage.setItem("userRole", role || "attendee");
+          localStorage.setItem(
+            "userName",
+            name || data.user.email?.split("@")[0] || "User"
+          );
+
+          toast({
+            title: "Account created!",
+            description: "Welcome to GatherEase!",
+          });
+
+          // Redirect based on role
+          if (role === "organizer") {
+            navigate("/organizer-dashboard");
+          } else {
+            navigate("/dashboard");
+          }
+        } else {
+          // Email verification required
+          localStorage.setItem("userRole", role || "attendee");
+
+          toast({
+            title: "Account created!",
+            description:
+              "Please check your email to verify your account, then sign in.",
+          });
+          navigate("/login");
+        }
       }
     } catch (error: any) {
       toast({
@@ -72,14 +96,16 @@ const Signup = () => {
         </Link>
 
         <GlassCard className="p-8">
-          <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">
+            Create Account
+          </h2>
 
           {!role ? (
             <div className="space-y-4">
               <p className="text-center text-muted-foreground mb-6">
                 Choose your role to get started
               </p>
-              
+
               <button
                 onClick={() => setRole("attendee")}
                 className="w-full glass-card p-6 hover:bg-white/20 transition-all group"
@@ -153,8 +179,18 @@ const Signup = () => {
                 </div>
               </div>
 
-              <Button variant="gradient" className="w-full" size="lg" type="submit" disabled={loading}>
-                {loading ? "Creating Account..." : `Create Account as ${role === "attendee" ? "Attendee" : "Organizer"}`}
+              <Button
+                variant="gradient"
+                className="w-full"
+                size="lg"
+                type="submit"
+                disabled={loading}
+              >
+                {loading
+                  ? "Creating Account..."
+                  : `Create Account as ${
+                      role === "attendee" ? "Attendee" : "Organizer"
+                    }`}
               </Button>
 
               <button

@@ -1,10 +1,61 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Calendar, Users, BarChart3, Ticket, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  Calendar,
+  Users,
+  BarChart3,
+  Ticket,
+  Sparkles,
+  LayoutDashboard,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-bg.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check initial auth state and role
+    const checkAuthAndRole = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const storedRole = localStorage.getItem("userRole");
+      
+      setIsLoggedIn(!!session || !!localStorage.getItem("userSession"));
+      setUserRole(storedRole);
+      setLoading(false);
+    };
+
+    checkAuthAndRole();
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+      const storedRole = localStorage.getItem("userRole");
+      setUserRole(storedRole);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleDashboardClick = () => {
+    // Redirect based on user role
+    if (userRole === "superadmin") {
+      navigate("/superadmin");
+    } else if (userRole === "admin") {
+      navigate("/admin");
+    } else if (userRole === "organizer") {
+      navigate("/organizer-dashboard");
+    } else {
+      navigate("/dashboard"); // Default to attendee dashboard
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden">
       {/* Animated gradient orbs */}
@@ -23,13 +74,15 @@ const Index = () => {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8">
             <Sparkles className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium">Welcome to the Future of Events</span>
+            <span className="text-sm font-medium">
+              Welcome to the Future of Events
+            </span>
           </div>
-          
+
           <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient">
             GatherEase
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">
             Create, manage, and experience events like never before.
             <br />
@@ -43,11 +96,24 @@ const Index = () => {
                 <Calendar className="ml-2 w-5 h-5 group-hover:rotate-12 transition-transform" />
               </Button>
             </Link>
-            <Link to="/signup">
-              <Button variant="glass" size="lg">
-                Start Organizing
-              </Button>
-            </Link>
+            {!loading &&
+              (isLoggedIn ? (
+                <Button 
+                  variant="glass" 
+                  size="lg" 
+                  className="group"
+                  onClick={handleDashboardClick}
+                >
+                  Go to Dashboard
+                  <LayoutDashboard className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
+                </Button>
+              ) : (
+                <Link to="/signup">
+                  <Button variant="glass" size="lg">
+                    Start Organizing
+                  </Button>
+                </Link>
+              ))}
           </div>
         </motion.div>
 
@@ -92,26 +158,26 @@ const Index = () => {
               icon: Calendar,
               title: "Event Discovery",
               description: "Find and RSVP to events tailored to your interests",
-              gradient: "from-blue-500 to-cyan-500"
+              gradient: "from-blue-500 to-cyan-500",
             },
             {
               icon: Ticket,
               title: "Smart Ticketing",
               description: "QR codes, tiers, and seamless check-ins",
-              gradient: "from-purple-500 to-pink-500"
+              gradient: "from-purple-500 to-pink-500",
             },
             {
               icon: BarChart3,
               title: "Live Analytics",
               description: "Real-time insights and performance metrics",
-              gradient: "from-orange-500 to-yellow-500"
+              gradient: "from-orange-500 to-yellow-500",
             },
             {
               icon: Users,
               title: "Team Management",
               description: "Collaborate with role-based permissions",
-              gradient: "from-green-500 to-teal-500"
-            }
+              gradient: "from-green-500 to-teal-500",
+            },
           ].map((feature, index) => (
             <motion.div
               key={feature.title}
@@ -121,7 +187,9 @@ const Index = () => {
               transition={{ delay: index * 0.1 }}
             >
               <div className="glass-card p-8 h-full hover:scale-105 transition-transform duration-300 group">
-                <div className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-4`}>
+                <div
+                  className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-4`}
+                >
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
@@ -146,11 +214,20 @@ const Index = () => {
           <p className="text-lg text-muted-foreground mb-8">
             Join thousands of organizers and attendees using GatherEase
           </p>
-          <Link to="/signup">
-            <Button variant="gradient" size="lg">
-              Get Started Free
-            </Button>
-          </Link>
+          {!loading &&
+            (isLoggedIn ? (
+              <Link to="/create-event">
+                <Button variant="gradient" size="lg">
+                  Create Your First Event
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/signup">
+                <Button variant="gradient" size="lg">
+                  Get Started Free
+                </Button>
+              </Link>
+            ))}
         </motion.div>
       </section>
     </div>

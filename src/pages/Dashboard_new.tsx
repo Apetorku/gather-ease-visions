@@ -3,15 +3,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -27,53 +19,10 @@ import {
   MapPin,
   Heart,
   Share2,
-  LogOut,
-  User,
 } from "lucide-react";
 import dashboardImage from "@/assets/dashboard-3d.png";
-import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [userName, setUserName] = useState("User");
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Check authentication on mount
-  useEffect(() => {
-    const userSession = localStorage.getItem("userSession");
-    const storedUserName = localStorage.getItem("userName");
-    
-    if (!userSession) {
-      // Redirect to login if not authenticated
-      navigate("/login", { replace: true });
-      return;
-    }
-    
-    setUserName(storedUserName || "User");
-    setIsLoading(false);
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("userSession");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userEmail");
-    navigate("/", { replace: true });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   const myTickets = [
     {
       id: 1,
@@ -140,28 +89,23 @@ const Dashboard = () => {
   const notifications = [
     {
       id: 1,
-      title: "New Event Match",
       message: "New tech event matching your interests",
+      type: "recommendation",
       time: "2h ago",
-      read: false,
     },
     {
       id: 2,
-      title: "Event Reminder",
       message: "Tech Summit 2025 starts in 2 days",
+      type: "reminder",
       time: "1d ago",
-      read: false,
     },
     {
       id: 3,
-      title: "Feedback Request",
       message: "Event feedback requested for Design Workshop",
+      type: "feedback",
       time: "3d ago",
-      read: true,
     },
   ];
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
@@ -180,117 +124,19 @@ const Dashboard = () => {
             <Link to="/my-tickets">
               <Button variant="ghost">My Tickets</Button>
             </Link>
-            <DropdownMenu
-              open={showNotifications}
-              onOpenChange={setShowNotifications}
-            >
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="w-5 h-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-sm text-muted-foreground">
-                      No new notifications
-                    </div>
-                  ) : (
-                    notifications.map((notification) => (
-                      <DropdownMenuItem
-                        key={notification.id}
-                        className={`flex flex-col items-start p-4 ${
-                          !notification.read ? "bg-primary/5" : ""
-                        }`}
-                      >
-                        <div className="flex items-start justify-between w-full">
-                          <div className="flex-1">
-                            <p className="font-semibold text-sm">
-                              {notification.title}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              {notification.time}
-                            </p>
-                          </div>
-                          {!notification.read && (
-                            <div className="w-2 h-2 rounded-full bg-blue-500 ml-2 mt-1" />
-                          )}
-                        </div>
-                      </DropdownMenuItem>
-                    ))
-                  )}
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="w-full text-center justify-center">
-                  <span className="text-sm text-primary">
-                    View all notifications
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="glass" size="icon" className="relative">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName}`}
-                    />
-                    <AvatarFallback>
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {userName}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      Dashboard
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/my-tickets")}>
-                  <Ticket className="mr-2 h-4 w-4" />
-                  <span>My Tickets</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/events")}>
-                  <Calendar className="mr-2 h-4 w-4" />
-                  <span>Browse Events</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-red-600"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="w-5 h-5" />
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full flex items-center justify-center text-xs text-white">
+                  {notifications.length}
+                </span>
+              )}
+            </Button>
+            <Link to="/profile">
+              <Button variant="glass" size="icon">
+                <Settings className="w-5 h-5" />
+              </Button>
+            </Link>
           </nav>
         </div>
       </header>
@@ -608,21 +454,28 @@ const Dashboard = () => {
               {notifications.map((notification) => (
                 <GlassCard key={notification.id} className="p-4">
                   <div className="flex items-start gap-4">
-                    <div className="flex items-start justify-between w-full">
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm mb-1">
-                          {notification.title}
-                        </p>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {notification.time}
-                        </p>
-                      </div>
-                      {!notification.read && (
-                        <div className="w-2 h-2 rounded-full bg-blue-500 ml-2 mt-1" />
+                    <div
+                      className={`p-2 rounded-lg ${
+                        notification.type === "recommendation"
+                          ? "bg-blue-500/20"
+                          : notification.type === "reminder"
+                          ? "bg-orange-500/20"
+                          : "bg-green-500/20"
+                      }`}
+                    >
+                      {notification.type === "recommendation" ? (
+                        <TrendingUp className="w-5 h-5 text-blue-500" />
+                      ) : notification.type === "reminder" ? (
+                        <Bell className="w-5 h-5 text-orange-500" />
+                      ) : (
+                        <Star className="w-5 h-5 text-green-500" />
                       )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm mb-1">{notification.message}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {notification.time}
+                      </p>
                     </div>
                   </div>
                 </GlassCard>

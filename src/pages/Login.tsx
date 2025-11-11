@@ -21,6 +21,61 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // Demo/Testing mode for Super Admin
+      if (email === "bamenorhu8@gmail.com" && password === "1234567") {
+        // Store session data for demo super admin
+        localStorage.setItem("userSession", "demo-superadmin-session");
+        localStorage.setItem("userRole", "superadmin");
+        localStorage.setItem("userName", "Super Admin");
+        localStorage.setItem("userEmail", email);
+
+        toast({
+          title: "Welcome back!",
+          description: "Welcome Super Admin! (Demo Mode)",
+        });
+
+        navigate("/superadmin");
+        setLoading(false);
+        return;
+      }
+
+      // Demo/Testing mode for Normal Admin
+      if (email === "bamenorhu9@gmail.com" && password === "1234567") {
+        // Store session data for demo admin
+        localStorage.setItem("userSession", "demo-admin-session");
+        localStorage.setItem("userRole", "admin");
+        localStorage.setItem("userName", "Admin User");
+        localStorage.setItem("userEmail", email);
+
+        toast({
+          title: "Welcome back!",
+          description: "Welcome Admin! (Demo Mode)",
+        });
+
+        navigate("/admin");
+        setLoading(false);
+        return;
+      }
+
+      // Demo/Testing mode for Organizer
+      if (email === "organizer@test.com" && password === "organizer123") {
+        // Store session data for demo organizer
+        localStorage.setItem("userSession", "demo-organizer-session");
+        localStorage.setItem("userRole", "organizer");
+        localStorage.setItem("userName", "Event Organizer");
+        localStorage.setItem("userEmail", email);
+
+        toast({
+          title: "Welcome back!",
+          description: "Welcome Organizer! (Demo Mode)",
+        });
+
+        navigate("/organizer-dashboard");
+        setLoading(false);
+        return;
+      }
+
+      // Regular Supabase authentication
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -29,21 +84,40 @@ const Login = () => {
       if (error) throw error;
 
       if (data.user) {
-        // Get user role from metadata
-        const userRole = data.user.user_metadata?.role || 'attendee';
-        
-        // Store role in localStorage for frontend access
-        localStorage.setItem('userRole', userRole);
-        
+        // Check if user is the designated super admin
+        const isSuperAdmin = data.user.email === "bamenorhu8@gmail.com";
+
+        // Get user role from metadata, override for super admin
+        let userRole = isSuperAdmin
+          ? "superadmin"
+          : data.user.user_metadata?.role || "attendee";
+        const userName =
+          data.user.user_metadata?.full_name ||
+          data.user.email?.split("@")[0] ||
+          "User";
+
+        // Store session, role, and name in localStorage for frontend access
+        localStorage.setItem(
+          "userSession",
+          data.session?.access_token || "logged-in"
+        );
+        localStorage.setItem("userRole", userRole);
+        localStorage.setItem("userName", userName);
+        localStorage.setItem("userEmail", data.user.email || "");
+
         toast({
           title: "Welcome back!",
-          description: "You have successfully logged in.",
+          description: isSuperAdmin
+            ? "Welcome Super Admin!"
+            : "You have successfully logged in.",
         });
 
         // Redirect based on role
-        if (userRole === 'admin') {
+        if (userRole === "superadmin") {
+          navigate("/superadmin");
+        } else if (userRole === "admin") {
           navigate("/admin");
-        } else if (userRole === 'organizer') {
+        } else if (userRole === "organizer") {
           navigate("/organizer-dashboard");
         } else {
           navigate("/dashboard");
@@ -109,12 +183,21 @@ const Login = () => {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <Link to="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link
+                to="/forgot-password"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
                 Forgot password?
               </Link>
             </div>
 
-            <Button variant="gradient" className="w-full" size="lg" type="submit" disabled={loading}>
+            <Button
+              variant="gradient"
+              className="w-full"
+              size="lg"
+              type="submit"
+              disabled={loading}
+            >
               {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
@@ -124,7 +207,9 @@ const Login = () => {
               <div className="w-full border-t border-white/20"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-transparent text-muted-foreground">Or continue with</span>
+              <span className="px-4 bg-transparent text-muted-foreground">
+                Or continue with
+              </span>
             </div>
           </div>
 

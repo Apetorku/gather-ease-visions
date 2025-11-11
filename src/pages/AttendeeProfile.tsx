@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,8 +8,17 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   User,
   Mail,
@@ -25,6 +34,81 @@ import {
 } from "lucide-react";
 
 const AttendeeProfile = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [userName, setUserName] = useState("User");
+  const [userEmail, setUserEmail] = useState("user@example.com");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const userSession = localStorage.getItem("userSession");
+    const storedUserName = localStorage.getItem("userName");
+    const storedUserEmail = localStorage.getItem("userEmail");
+    
+    if (!userSession) {
+      toast({
+        title: "Access Denied",
+        description: "Please login to view your profile",
+        variant: "destructive",
+      });
+      navigate("/login", { replace: true });
+      return;
+    }
+    
+    setUserName(storedUserName || "User");
+    setUserEmail(storedUserEmail || "user@example.com");
+    setIsLoading(false);
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userSession");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userEmail");
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out",
+    });
+    navigate("/", { replace: true });
+  };
+
+  const handleDashboardClick = () => {
+    const userRole = localStorage.getItem("userRole");
+    console.log("🔍 AttendeeProfile - Current user role:", userRole);
+    console.log("🔍 AttendeeProfile - localStorage:", {
+      userRole: localStorage.getItem("userRole"),
+      userName: localStorage.getItem("userName"),
+      userEmail: localStorage.getItem("userEmail"),
+    });
+    
+    // Redirect based on user role
+    if (userRole === "superadmin") {
+      console.log("✅ Navigating to /superadmin");
+      navigate("/superadmin");
+    } else if (userRole === "admin") {
+      console.log("✅ Navigating to /admin");
+      navigate("/admin");
+    } else if (userRole === "organizer") {
+      console.log("✅ Navigating to /organizer-dashboard");
+      navigate("/organizer-dashboard");
+    } else {
+      console.log("✅ Navigating to /dashboard (default)");
+      navigate("/dashboard"); // Default to attendee dashboard
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   const [notifications, setNotifications] = useState({
     newEvents: true,
     reminders: true,
@@ -55,14 +139,16 @@ const AttendeeProfile = () => {
       title: "Tech Innovation Summit",
       date: "March 15, 2025",
       ticket: "VIP Pass",
-      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=200&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=200&fit=crop",
     },
     {
       id: 2,
       title: "Design Workshop",
       date: "March 22, 2025",
       ticket: "Standard",
-      image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=200&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=200&fit=crop",
     },
   ];
 
@@ -112,12 +198,65 @@ const AttendeeProfile = () => {
             <Link to="/events">
               <Button variant="ghost">Events</Button>
             </Link>
-            <Link to="/dashboard">
-              <Button variant="ghost">Dashboard</Button>
-            </Link>
-            <Button variant="glass" size="icon">
-              <Settings className="w-5 h-5" />
+            <Button variant="ghost" onClick={handleDashboardClick}>
+              Dashboard
             </Button>
+            <Link to="/my-tickets">
+              <Button variant="ghost">My Tickets</Button>
+            </Link>
+            
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="glass" size="icon" className="relative">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName}`}
+                    />
+                    <AvatarFallback>
+                      <User className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {userName}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {userEmail}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDashboardClick}>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/my-tickets")}>
+                  <Ticket className="mr-2 h-4 w-4" />
+                  <span>My Tickets</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/events")}>
+                  <Heart className="mr-2 h-4 w-4" />
+                  <span>Browse Events</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
         </div>
       </header>
@@ -142,7 +281,9 @@ const AttendeeProfile = () => {
                     </button>
                   </div>
                   <h2 className="text-2xl font-bold mb-1">John Doe</h2>
-                  <p className="text-muted-foreground mb-4">john.doe@example.com</p>
+                  <p className="text-muted-foreground mb-4">
+                    john.doe@example.com
+                  </p>
                   <Badge variant="secondary">Verified Attendee</Badge>
                 </div>
 
@@ -184,7 +325,11 @@ const AttendeeProfile = () => {
                   <Settings className="w-4 h-4 mr-2" />
                   Account Settings
                 </Button>
-                <Button variant="ghost" className="w-full text-destructive">
+                <Button
+                  variant="ghost"
+                  className="w-full text-destructive"
+                  onClick={handleLogout}
+                >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
                 </Button>
@@ -204,13 +349,17 @@ const AttendeeProfile = () => {
                     <TabsTrigger value="profile">Profile</TabsTrigger>
                     <TabsTrigger value="events">My Events</TabsTrigger>
                     <TabsTrigger value="preferences">Preferences</TabsTrigger>
-                    <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                    <TabsTrigger value="notifications">
+                      Notifications
+                    </TabsTrigger>
                   </TabsList>
 
                   {/* Profile Tab */}
                   <TabsContent value="profile" className="space-y-6">
                     <div>
-                      <h3 className="text-xl font-semibold mb-4">Personal Information</h3>
+                      <h3 className="text-xl font-semibold mb-4">
+                        Personal Information
+                      </h3>
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="firstName">First Name</Label>
@@ -272,7 +421,9 @@ const AttendeeProfile = () => {
                   {/* Events Tab */}
                   <TabsContent value="events" className="space-y-6">
                     <div>
-                      <h3 className="text-xl font-semibold mb-4">Upcoming Events</h3>
+                      <h3 className="text-xl font-semibold mb-4">
+                        Upcoming Events
+                      </h3>
                       <div className="space-y-4">
                         {upcomingEvents.map((event) => (
                           <div
@@ -285,7 +436,9 @@ const AttendeeProfile = () => {
                               className="w-24 h-24 rounded-lg object-cover"
                             />
                             <div className="flex-1">
-                              <h4 className="font-semibold mb-1">{event.title}</h4>
+                              <h4 className="font-semibold mb-1">
+                                {event.title}
+                              </h4>
                               <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                                 <div className="flex items-center gap-1">
                                   <Calendar className="w-4 h-4" />
@@ -311,7 +464,9 @@ const AttendeeProfile = () => {
                     </div>
 
                     <div>
-                      <h3 className="text-xl font-semibold mb-4">Past Events</h3>
+                      <h3 className="text-xl font-semibold mb-4">
+                        Past Events
+                      </h3>
                       <div className="space-y-3">
                         {pastEvents.map((event) => (
                           <div
@@ -319,8 +474,12 @@ const AttendeeProfile = () => {
                             className="flex items-center justify-between p-4 rounded-xl bg-white/5"
                           >
                             <div>
-                              <h4 className="font-semibold mb-1">{event.title}</h4>
-                              <p className="text-sm text-muted-foreground">{event.date}</p>
+                              <h4 className="font-semibold mb-1">
+                                {event.title}
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                {event.date}
+                              </p>
                             </div>
                             <div className="flex items-center gap-3">
                               {event.attended ? (
@@ -331,7 +490,10 @@ const AttendeeProfile = () => {
                               {event.rating && (
                                 <div className="flex gap-1">
                                   {[...Array(event.rating)].map((_, i) => (
-                                    <Heart key={i} className="w-4 h-4 fill-red-500 text-red-500" />
+                                    <Heart
+                                      key={i}
+                                      className="w-4 h-4 fill-red-500 text-red-500"
+                                    />
                                   ))}
                                 </div>
                               )}
@@ -345,15 +507,22 @@ const AttendeeProfile = () => {
                   {/* Preferences Tab */}
                   <TabsContent value="preferences" className="space-y-6">
                     <div>
-                      <h3 className="text-xl font-semibold mb-4">Event Interests</h3>
+                      <h3 className="text-xl font-semibold mb-4">
+                        Event Interests
+                      </h3>
                       <p className="text-muted-foreground mb-4">
-                        Select your interests to receive personalized event recommendations
+                        Select your interests to receive personalized event
+                        recommendations
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {interests.map((interest) => (
                           <Badge
                             key={interest}
-                            variant={selectedInterests.includes(interest) ? "default" : "outline"}
+                            variant={
+                              selectedInterests.includes(interest)
+                                ? "default"
+                                : "outline"
+                            }
                             className="cursor-pointer px-4 py-2"
                             onClick={() => toggleInterest(interest)}
                           >
@@ -370,26 +539,34 @@ const AttendeeProfile = () => {
                   {/* Notifications Tab */}
                   <TabsContent value="notifications" className="space-y-6">
                     <div>
-                      <h3 className="text-xl font-semibold mb-4">Notification Settings</h3>
+                      <h3 className="text-xl font-semibold mb-4">
+                        Notification Settings
+                      </h3>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
                           <div>
                             <p className="font-semibold mb-1">New Events</p>
                             <p className="text-sm text-muted-foreground">
-                              Get notified about new events matching your interests
+                              Get notified about new events matching your
+                              interests
                             </p>
                           </div>
                           <Switch
                             checked={notifications.newEvents}
                             onCheckedChange={(checked) =>
-                              setNotifications({ ...notifications, newEvents: checked })
+                              setNotifications({
+                                ...notifications,
+                                newEvents: checked,
+                              })
                             }
                           />
                         </div>
 
                         <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
                           <div>
-                            <p className="font-semibold mb-1">Event Reminders</p>
+                            <p className="font-semibold mb-1">
+                              Event Reminders
+                            </p>
                             <p className="text-sm text-muted-foreground">
                               Receive reminders before events you're attending
                             </p>
@@ -397,7 +574,10 @@ const AttendeeProfile = () => {
                           <Switch
                             checked={notifications.reminders}
                             onCheckedChange={(checked) =>
-                              setNotifications({ ...notifications, reminders: checked })
+                              setNotifications({
+                                ...notifications,
+                                reminders: checked,
+                              })
                             }
                           />
                         </div>
@@ -412,7 +592,10 @@ const AttendeeProfile = () => {
                           <Switch
                             checked={notifications.updates}
                             onCheckedChange={(checked) =>
-                              setNotifications({ ...notifications, updates: checked })
+                              setNotifications({
+                                ...notifications,
+                                updates: checked,
+                              })
                             }
                           />
                         </div>
@@ -421,13 +604,17 @@ const AttendeeProfile = () => {
                           <div>
                             <p className="font-semibold mb-1">Newsletter</p>
                             <p className="text-sm text-muted-foreground">
-                              Receive our weekly newsletter with event highlights
+                              Receive our weekly newsletter with event
+                              highlights
                             </p>
                           </div>
                           <Switch
                             checked={notifications.newsletter}
                             onCheckedChange={(checked) =>
-                              setNotifications({ ...notifications, newsletter: checked })
+                              setNotifications({
+                                ...notifications,
+                                newsletter: checked,
+                              })
                             }
                           />
                         </div>
