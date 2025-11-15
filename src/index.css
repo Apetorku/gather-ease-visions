@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Fintech AI Neo-gradient Palette - Light Mode */
-    --background: 220 30% 96%;
+    --background: 217 71% 92%;
     --foreground: 220 20% 15%;
 
     --card: 0 0% 100%;
@@ -67,7 +67,7 @@ All colors MUST be HSL.
 
   .dark {
     /* Fintech AI Neo-gradient Palette - Dark Mode (Deep Navy Base) */
-    --background: 220 45% 8%;
+    --background: 217 71% 12%;
     --foreground: 220 15% 95%;
 
     --card: 220 40% 12%;
