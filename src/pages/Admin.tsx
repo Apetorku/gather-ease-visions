@@ -161,10 +161,13 @@ const Admin = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading admin panel...</p>
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/10 to-accent/10 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/30 rounded-full blur-3xl glow-pulse" />
+        </div>
+        <div className="text-center relative z-10">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary mx-auto glow-primary"></div>
+          <p className="mt-6 text-muted-foreground text-lg font-medium">Loading admin panel...</p>
         </div>
       </div>
     );
@@ -212,9 +215,16 @@ const Admin = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/10 to-accent/10 relative overflow-hidden">
+      {/* Fintech AI Premium Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-primary/30 rounded-full blur-[140px] glow-primary" />
+        <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-accent/30 rounded-full blur-[140px] glow-accent" />
+        <div className="absolute top-1/3 left-1/2 w-[500px] h-[500px] bg-secondary/25 rounded-full blur-[120px] float-animation" />
+      </div>
+
       {/* Header */}
-      <header className="border-b border-white/10 backdrop-blur-xl bg-white/5 sticky top-0 z-50">
+      <header className="glass-card sticky top-0 z-50 border-b border-white/10 backdrop-blur-2xl elevation-3">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
