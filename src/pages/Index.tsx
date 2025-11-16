@@ -57,11 +57,12 @@ const Index = () => {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden">
-      {/* Animated gradient orbs */}
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/10 to-secondary/10 relative overflow-hidden">
+      {/* Fintech AI Gradient Orbs with Glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse delay-700" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/30 rounded-full blur-[120px] animate-pulse glow-primary" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/30 rounded-full blur-[120px] animate-pulse delay-700 glow-secondary" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[100px] float-animation" />
       </div>
 
       {/* Hero Section */}
@@ -72,14 +73,14 @@ const Index = () => {
           transition={{ duration: 0.6 }}
           className="text-center max-w-4xl mx-auto"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8">
-            <Sparkles className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-card elevation-2 mb-8 hover-lift">
+            <Sparkles className="w-4 h-4 text-secondary animate-pulse" />
+            <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Welcome to the Future of Events
             </span>
           </div>
 
-          <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient">
+          <h1 className="text-6xl md:text-8xl font-black mb-8 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-gradient tracking-tight">
             GatherEase
           </h1>
 
