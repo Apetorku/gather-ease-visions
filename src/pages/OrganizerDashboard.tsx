@@ -6,13 +6,6 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -43,9 +36,6 @@ import {
   Settings,
   Edit,
   Trash2,
-  UserPlus,
-  Shield,
-  Clock,
   TrendingUp,
   Download,
   Copy,
@@ -63,7 +53,6 @@ const OrganizerDashboard = () => {
   const [userName, setUserName] = useState("Organizer");
   const [isLoading, setIsLoading] = useState(true);
 
-  // All state declarations
   const [myEvents, setMyEvents] = useState([
     {
       id: 1,
@@ -87,36 +76,6 @@ const OrganizerDashboard = () => {
     },
   ]);
 
-  const [teamMembers] = useState([
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      email: "sarah@example.com",
-      role: "Admin",
-      avatar: "https://api.dicebear.com/7.x/initials/svg?seed=SJ",
-      joinedDate: "Jan 15, 2024",
-      lastActive: "2 hours ago",
-    },
-    {
-      id: 2,
-      name: "Mike Chen",
-      email: "mike@example.com",
-      role: "Editor",
-      avatar: "https://api.dicebear.com/7.x/initials/svg?seed=MC",
-      joinedDate: "Feb 20, 2024",
-      lastActive: "1 day ago",
-    },
-    {
-      id: 3,
-      name: "Emily Davis",
-      email: "emily@example.com",
-      role: "Viewer",
-      avatar: "https://api.dicebear.com/7.x/initials/svg?seed=ED",
-      joinedDate: "Mar 10, 2024",
-      lastActive: "3 days ago",
-    },
-  ]);
-
   const [organizationStats] = useState({
     totalEvents: 12,
     totalRevenue: 48750,
@@ -130,7 +89,6 @@ const OrganizerDashboard = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingEventId, setDeletingEventId] = useState<number | null>(null);
 
-  // Check authentication and role on mount
   useEffect(() => {
     const userSession = localStorage.getItem("userSession");
     const userRole = localStorage.getItem("userRole");
@@ -181,7 +139,6 @@ const OrganizerDashboard = () => {
       userEmail: localStorage.getItem("userEmail"),
     });
     
-    // Redirect based on user role
     if (userRole === "superadmin") {
       console.log("✅ Navigating to /superadmin");
       navigate("/superadmin");
@@ -190,7 +147,6 @@ const OrganizerDashboard = () => {
       navigate("/admin");
     } else if (userRole === "organizer") {
       console.log("✅ Staying on /organizer-dashboard");
-      // Already on organizer dashboard, could scroll to top or refresh
       window.scrollTo({ top: 0, behavior: 'smooth' });
       toast({
         title: "Already on Dashboard",
@@ -198,7 +154,7 @@ const OrganizerDashboard = () => {
       });
     } else {
       console.log("✅ Navigating to /dashboard (default)");
-      navigate("/dashboard"); // Default to attendee dashboard
+      navigate("/dashboard");
     }
   };
 
@@ -207,8 +163,6 @@ const OrganizerDashboard = () => {
       title: "Opening Check-In",
       description: `Opening QR check-in interface for ${event.name}`,
     });
-    // In a real app, this would navigate to a dedicated check-in page
-    // navigate(`/organizer/check-in/${event.id}`);
   };
 
   if (isLoading) {
@@ -269,22 +223,8 @@ const OrganizerDashboard = () => {
     });
   };
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "Admin":
-        return "bg-red-500/20 text-red-400";
-      case "Editor":
-        return "bg-blue-500/20 text-blue-400";
-      case "Viewer":
-        return "bg-green-500/20 text-green-400";
-      default:
-        return "bg-gray-500/20 text-gray-400";
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
-      {/* Header */}
       <header className="border-b border-white/10 backdrop-blur-xl bg-white/5 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <Link to="/">
@@ -293,19 +233,12 @@ const OrganizerDashboard = () => {
             </h1>
           </Link>
           <nav className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-            <Link to="/organizer/create-event">
-              <Button variant="gradient" size="sm" className="sm:h-10">
-                <Plus className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Create Event</span>
-              </Button>
-            </Link>
-            <Link to="/events">
+            <Link to="/organizer/events">
               <Button variant="ghost" size="sm" className="sm:h-10">
-                Browse Events
+                My Events
               </Button>
             </Link>
             
-            {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="glass" size="icon" className="relative">
@@ -335,9 +268,9 @@ const OrganizerDashboard = () => {
                   <User className="mr-2 h-4 w-4" />
                   <span>My Dashboard</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/events")}>
+                <DropdownMenuItem onClick={() => navigate("/organizer/events")}>
                   <Calendar className="mr-2 h-4 w-4" />
-                  <span>Browse Events</span>
+                  <span>My Events</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <User className="mr-2 h-4 w-4" />
@@ -358,79 +291,29 @@ const OrganizerDashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-12">
-        {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
         >
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
-                Organizer Dashboard
-              </h2>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Manage your events, team, and organization
-              </p>
-            </div>
-            <Link to="/organizer/create-event">
-              <Button variant="gradient" size="lg" className="hidden sm:flex">
-                <Plus className="w-5 h-5 mr-2" />
-                Create Event
-              </Button>
-            </Link>
-          </div>
-
-          {/* Organization Overview Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            <GlassCard className="p-4 text-center">
-              <div className="text-2xl font-bold text-primary">
-                {organizationStats.totalEvents}
-              </div>
-              <div className="text-sm text-muted-foreground">Total Events</div>
-            </GlassCard>
-            <GlassCard className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-500">
-                ${organizationStats.totalRevenue.toLocaleString()}
-              </div>
-              <div className="text-sm text-muted-foreground">Revenue</div>
-            </GlassCard>
-            <GlassCard className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-500">
-                {organizationStats.totalAttendees}
-              </div>
-              <div className="text-sm text-muted-foreground">Attendees</div>
-            </GlassCard>
-            <GlassCard className="p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-500">
-                {organizationStats.avgRating}
-              </div>
-              <div className="text-sm text-muted-foreground">Avg Rating</div>
-            </GlassCard>
-            <GlassCard className="p-4 text-center">
-              <div className="flex items-center justify-center gap-1">
-                <TrendingUp className="w-5 h-5 text-green-500" />
-                <div className="text-xl font-bold text-green-500">
-                  +{organizationStats.growthRate}%
-                </div>
-              </div>
-              <div className="text-sm text-muted-foreground">Growth</div>
-            </GlassCard>
+          <div className="mb-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+              Organizer Dashboard
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Manage your events, team, and organization
+            </p>
           </div>
         </motion.div>
 
-        {/* Main Dashboard Tabs */}
         <Tabs defaultValue="events" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="events">My Events</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
           </TabsList>
 
-          {/* Events Tab */}
           <TabsContent value="events" className="space-y-6 mt-8">
-            {/* Event Management Tools Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -504,7 +387,6 @@ const OrganizerDashboard = () => {
               </GlassCard>
             </motion.div>
 
-            {/* Advanced Tools Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -524,7 +406,6 @@ const OrganizerDashboard = () => {
                         title: "QR Check-in System",
                         description: "Opening QR code scanner for event check-in",
                       });
-                      // Navigate to check-in page or open scanner
                       navigate("/organizer/check-in");
                     }}
                   >
@@ -603,7 +484,6 @@ const OrganizerDashboard = () => {
                   </Button>
                 </div>
 
-                {/* Secondary Advanced Tools */}
                 <div className="mt-4 pt-4 border-t border-white/10">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <Button
@@ -788,7 +668,6 @@ const OrganizerDashboard = () => {
                       </Button>
                     </div>
                     
-                    {/* Advanced Event Tools */}
                     {event.status === "active" && (
                       <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10">
                         <Button
@@ -836,201 +715,81 @@ const OrganizerDashboard = () => {
             </motion.div>
           </TabsContent>
 
-          {/* Team Management Tab */}
-          <TabsContent value="team" className="space-y-6 mt-8">
-            <div className="flex items-center justify-between mb-6">
+          <TabsContent value="analytics" className="space-y-6 mt-6 sm:mt-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-2xl font-bold">Team Management</h3>
-                <p className="text-muted-foreground">
-                  Manage team members and their permissions
-                </p>
-              </div>
-              <Button variant="gradient">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Invite Team Member
-              </Button>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-4 mb-6">
-              <GlassCard className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-500/20">
-                    <Users className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">
-                      {teamMembers.length}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Team Members
-                    </div>
-                  </div>
-                </div>
-              </GlassCard>
-
-              <GlassCard className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-red-500/20">
-                    <Shield className="w-5 h-5 text-red-400" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">1</div>
-                    <div className="text-sm text-muted-foreground">Admins</div>
-                  </div>
-                </div>
-              </GlassCard>
-
-              <GlassCard className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-500/20">
-                    <Clock className="w-5 h-5 text-green-400" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">2</div>
-                    <div className="text-sm text-muted-foreground">
-                      Active Today
-                    </div>
-                  </div>
-                </div>
-              </GlassCard>
-            </div>
-
-            <GlassCard className="p-6">
-              <div className="space-y-4">
-                {teamMembers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Avatar>
-                        <AvatarImage src={member.avatar} />
-                        <AvatarFallback>
-                          {member.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold">{member.name}</p>
-                          <Badge className={getRoleColor(member.role)}>
-                            {member.role}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {member.email}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Joined {member.joinedDate} • Last active{" "}
-                          {member.lastActive}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Select defaultValue={member.role.toLowerCase()}>
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="editor">Editor</SelectItem>
-                          <SelectItem value="viewer">Viewer</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button variant="ghost" size="sm">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </GlassCard>
-
-            <GlassCard className="p-6">
-              <h4 className="text-lg font-semibold mb-4">Role Permissions</h4>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div>
-                  <h5 className="font-medium mb-3 flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    Admin
-                  </h5>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• Full access to all features</li>
-                    <li>• Manage team members</li>
-                    <li>• Delete events and data</li>
-                    <li>• Billing and subscription</li>
-                  </ul>
-                </div>
-                <div>
-                  <h5 className="font-medium mb-3 flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    Editor
-                  </h5>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• Create and edit events</li>
-                    <li>• Manage registrations</li>
-                    <li>• View analytics</li>
-                    <li>• Send notifications</li>
-                  </ul>
-                </div>
-                <div>
-                  <h5 className="font-medium mb-3 flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    Viewer
-                  </h5>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• View events and analytics</li>
-                    <li>• Check-in attendees</li>
-                    <li>• Export reports</li>
-                    <li>• Read-only access</li>
-                  </ul>
-                </div>
-              </div>
-            </GlassCard>
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6 mt-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-2xl font-bold">Analytics Overview</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl sm:text-2xl font-bold">Analytics Overview</h3>
+                <p className="text-sm text-muted-foreground">
                   Track performance across all your events
                 </p>
               </div>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <GlassCard className="p-6">
-                <h4 className="text-lg font-semibold mb-4">Revenue Trends</h4>
-                <div className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <GlassCard className="p-4 text-center">
+                <div className="text-2xl font-bold text-primary">
+                  {organizationStats.totalEvents}
+                </div>
+                <div className="text-sm text-muted-foreground">Total Events</div>
+              </GlassCard>
+              <GlassCard className="p-4 text-center">
+                <div className="text-2xl font-bold text-green-500">
+                  ${organizationStats.totalRevenue.toLocaleString()}
+                </div>
+                <div className="text-sm text-muted-foreground">Revenue</div>
+              </GlassCard>
+              <GlassCard className="p-4 text-center">
+                <div className="text-2xl font-bold text-blue-500">
+                  {organizationStats.totalAttendees}
+                </div>
+                <div className="text-sm text-muted-foreground">Attendees</div>
+              </GlassCard>
+              <GlassCard className="p-4 text-center">
+                <div className="text-2xl font-bold text-yellow-500">
+                  {organizationStats.avgRating}
+                </div>
+                <div className="text-sm text-muted-foreground">Avg Rating</div>
+              </GlassCard>
+              <GlassCard className="p-4 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <TrendingUp className="w-5 h-5 text-green-500" />
+                  <div className="text-xl font-bold text-green-500">
+                    +{organizationStats.growthRate}%
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground">Growth</div>
+              </GlassCard>
+            </div>
+
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <GlassCard className="p-4 sm:p-6">
+                <h4 className="text-base sm:text-lg font-semibold mb-4">Revenue Trends</h4>
+                <div className="space-y-3 sm:space-y-4">
                   {["January", "February", "March"].map((month, index) => {
                     const revenue = [8500, 12200, 15800][index];
                     const growth = [0, 43, 29][index];
                     return (
                       <div
                         key={month}
-                        className="flex items-center justify-between"
+                        className="flex items-center justify-between gap-2"
                       >
-                        <span className="text-sm">{month}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 bg-white/20 rounded-full h-2">
+                        <span className="text-xs sm:text-sm flex-shrink-0">{month}</span>
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className="flex-1 max-w-24 sm:max-w-none sm:w-24 bg-white/20 rounded-full h-2">
                             <div
                               className="bg-green-500 h-2 rounded-full"
                               style={{ width: `${(revenue / 20000) * 100}%` }}
                             />
                           </div>
-                          <span className="text-sm font-medium w-16">
+                          <span className="text-xs sm:text-sm font-medium w-12 sm:w-16 text-right">
                             ${revenue.toLocaleString()}
                           </span>
                           {growth > 0 && (
-                            <span className="text-xs text-green-500">
+                            <span className="text-xs text-green-500 flex-shrink-0">
                               +{growth}%
                             </span>
                           )}
@@ -1041,18 +800,18 @@ const OrganizerDashboard = () => {
                 </div>
               </GlassCard>
 
-              <GlassCard className="p-6">
-                <h4 className="text-lg font-semibold mb-4">
+              <GlassCard className="p-4 sm:p-6">
+                <h4 className="text-base sm:text-lg font-semibold mb-4">
                   Event Performance
                 </h4>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {myEvents.map((event) => (
                     <div key={event.id} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="truncate flex-1 mr-2">
+                      <div className="flex justify-between text-xs sm:text-sm gap-2">
+                        <span className="truncate flex-1">
                           {event.name}
                         </span>
-                        <span className="text-muted-foreground">
+                        <span className="text-muted-foreground flex-shrink-0">
                           {event.attendees} attendees
                         </span>
                       </div>
@@ -1067,22 +826,21 @@ const OrganizerDashboard = () => {
             </div>
           </TabsContent>
 
-          {/* Templates Tab */}
-          <TabsContent value="templates" className="space-y-6 mt-8">
-            <div className="flex items-center justify-between mb-6">
+          <TabsContent value="templates" className="space-y-6 mt-6 sm:mt-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-2xl font-bold">Event Templates</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl sm:text-2xl font-bold">Event Templates</h3>
+                <p className="text-sm text-muted-foreground">
                   Save time with pre-configured event templates
                 </p>
               </div>
-              <Button variant="gradient">
+              <Button variant="gradient" className="w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[
                 { name: "Tech Conference", events: 5, category: "Technology" },
                 { name: "Workshop Series", events: 12, category: "Education" },
@@ -1090,20 +848,20 @@ const OrganizerDashboard = () => {
               ].map((template, index) => (
                 <GlassCard
                   key={index}
-                  className="p-6 hover:scale-105 transition-transform cursor-pointer"
+                  className="p-4 sm:p-6 hover:scale-105 transition-transform cursor-pointer"
                 >
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <div>
-                      <h4 className="font-semibold text-lg">{template.name}</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <h4 className="font-semibold text-base sm:text-lg">{template.name}</h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {template.category}
                       </p>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
                       <span>Used in {template.events} events</span>
                       <Badge variant="outline">{template.category}</Badge>
                     </div>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full">
                       Use Template
                     </Button>
                   </div>
@@ -1112,10 +870,9 @@ const OrganizerDashboard = () => {
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* Edit Event Dialog */}
+        
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-[95vw] sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Edit Event</DialogTitle>
               <DialogDescription>
@@ -1180,7 +937,6 @@ const OrganizerDashboard = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Delete Confirmation Dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>

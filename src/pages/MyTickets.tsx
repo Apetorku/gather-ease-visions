@@ -38,13 +38,14 @@ const MyTickets = () => {
   const [selectedTicket, setSelectedTicket] = useState<number | null>(null);
   const [userName, setUserName] = useState("User");
   const [isLoading, setIsLoading] = useState(true);
+  const [tickets, setTickets] = useState<any[]>([]);
   const { toast } = useToast();
 
   // Check authentication on mount
   useEffect(() => {
     const userSession = localStorage.getItem("userSession");
     const storedUserName = localStorage.getItem("userName");
-    
+
     if (!userSession) {
       toast({
         title: "Access Denied",
@@ -54,10 +55,22 @@ const MyTickets = () => {
       navigate("/login", { replace: true });
       return;
     }
-    
+
     setUserName(storedUserName || "User");
+
+    // Load tickets from localStorage
+    const savedTickets = localStorage.getItem("myTickets");
+    if (savedTickets) {
+      try {
+        const parsedTickets = JSON.parse(savedTickets);
+        setTickets(parsedTickets);
+      } catch (error) {
+        console.error("Error loading tickets:", error);
+      }
+    }
+
     setIsLoading(false);
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleLogout = () => {
     localStorage.removeItem("userSession");
@@ -79,7 +92,7 @@ const MyTickets = () => {
       userName: localStorage.getItem("userName"),
       userEmail: localStorage.getItem("userEmail"),
     });
-    
+
     // Redirect based on user role
     if (userRole === "superadmin") {
       console.log("✅ Navigating to /superadmin");
@@ -227,53 +240,29 @@ const MyTickets = () => {
     }
   };
 
-  const tickets = [
-    {
-      id: 1,
-      eventTitle: "Tech Innovation Summit 2025",
-      eventDate: "March 15, 2025",
-      eventTime: "9:00 AM - 5:00 PM",
-      location: "Silicon Valley Convention Center",
-      ticketType: "VIP Pass",
-      ticketNumber: "TIS2025-VIP-1234",
-      qrCode:
-        "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=TIS2025-VIP-1234",
-      status: "active",
-      purchaseDate: "Feb 10, 2025",
-      price: 299,
-    },
-    {
-      id: 2,
-      eventTitle: "Design Workshop",
-      eventDate: "March 22, 2025",
-      eventTime: "2:00 PM - 6:00 PM",
-      location: "Creative Hub Downtown",
-      ticketType: "Standard Pass",
-      ticketNumber: "DW2025-STD-5678",
-      qrCode:
-        "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=DW2025-STD-5678",
-      status: "active",
-      purchaseDate: "Feb 15, 2025",
-      price: 149,
-    },
-    {
-      id: 3,
-      eventTitle: "Music Festival 2024",
-      eventDate: "December 10, 2024",
-      eventTime: "12:00 PM - 11:00 PM",
-      location: "City Park Grounds",
-      ticketType: "General Admission",
-      ticketNumber: "MF2024-GA-9012",
-      qrCode:
-        "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=MF2024-GA-9012",
-      status: "used",
-      purchaseDate: "Nov 5, 2024",
-      price: 99,
-    },
-  ];
+  // Add default demo tickets if no tickets exist
+  const defaultTickets =
+    tickets.length === 0
+      ? [
+          {
+            id: 1,
+            eventTitle: "Tech Innovation Summit 2025",
+            eventDate: "March 15, 2025",
+            eventTime: "9:00 AM - 5:00 PM",
+            location: "Silicon Valley Convention Center",
+            ticketType: "VIP Pass",
+            ticketNumber: "TIS2025-VIP-1234",
+            qrCode:
+              "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=TIS2025-VIP-1234",
+            status: "active",
+            purchaseDate: "Feb 10, 2025",
+            price: 299,
+          },
+        ]
+      : tickets;
 
-  const activeTickets = tickets.filter((t) => t.status === "active");
-  const pastTickets = tickets.filter((t) => t.status === "used");
+  const activeTickets = defaultTickets.filter((t) => t.status === "active");
+  const pastTickets = defaultTickets.filter((t) => t.status === "used");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
@@ -292,7 +281,7 @@ const MyTickets = () => {
             <Button variant="ghost" onClick={handleDashboardClick}>
               Dashboard
             </Button>
-            
+
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

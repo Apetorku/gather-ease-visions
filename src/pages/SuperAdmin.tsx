@@ -468,17 +468,17 @@ const SuperAdmin = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
       {/* Header */}
       <header className="border-b border-white/10 backdrop-blur-xl bg-white/5 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
           <Link to="/">
             <div className="flex items-center gap-2">
-              <Crown className="w-6 h-6 text-yellow-500" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
+              <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
+              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
                 Super Admin
               </h1>
             </div>
           </Link>
-          <nav className="flex items-center gap-4">
-            <Link to="/events">
+          <nav className="flex items-center gap-2 sm:gap-4">
+            <Link to="/events" className="hidden sm:block">
               <Button variant="ghost">Browse Events</Button>
             </Link>
             
@@ -531,25 +531,25 @@ const SuperAdmin = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Stats Overview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
         >
           {stats.map((stat, index) => (
             <GlassCard
               key={stat.label}
-              className="p-4 hover:scale-105 transition-transform"
+              className="p-3 sm:p-4 hover:scale-105 transition-transform"
             >
               <div className="flex items-center justify-between mb-2">
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.color}`} />
                 <Badge variant="secondary" className="text-xs">
                   {stat.change}
                 </Badge>
               </div>
-              <p className="text-2xl font-bold mb-1">{stat.value}</p>
+              <p className="text-lg sm:text-2xl font-bold mb-1">{stat.value}</p>
               <p className="text-xs text-muted-foreground">{stat.label}</p>
             </GlassCard>
           ))}
@@ -557,27 +557,27 @@ const SuperAdmin = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-8">
-            <TabsTrigger value="admins" className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
+          <TabsList className="grid w-full grid-cols-4 mb-6 sm:mb-8">
+            <TabsTrigger value="admins" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Admin Management</span>
               <span className="sm:hidden">Admins</span>
             </TabsTrigger>
             <TabsTrigger
               value="permissions"
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
             >
-              <Lock className="w-4 h-4" />
+              <Lock className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Permissions</span>
               <span className="sm:hidden">Access</span>
             </TabsTrigger>
-            <TabsTrigger value="system" className="flex items-center gap-2">
-              <Activity className="w-4 h-4" />
+            <TabsTrigger value="system" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">System Logs</span>
               <span className="sm:hidden">Logs</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
+            <TabsTrigger value="settings" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Platform Settings</span>
               <span className="sm:hidden">Settings</span>
             </TabsTrigger>
@@ -585,17 +585,17 @@ const SuperAdmin = () => {
 
           {/* Admin Management Tab */}
           <TabsContent value="admins">
-            <GlassCard className="p-6">
-              <div className="flex items-center justify-between mb-6">
+            <GlassCard className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold mb-2">Admin Management</h2>
-                  <p className="text-muted-foreground">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-2">Admin Management</h2>
+                  <p className="text-sm text-muted-foreground">
                     Manage admin accounts and their access levels
                   </p>
                 </div>
                 <Dialog open={isAddAdminOpen} onOpenChange={setIsAddAdminOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="gradient">
+                    <Button variant="gradient" className="w-full sm:w-auto">
                       <UserPlus className="w-4 h-4 mr-2" />
                       Add Admin
                     </Button>
@@ -729,9 +729,9 @@ const SuperAdmin = () => {
                     animate={{ opacity: 1, x: 0 }}
                     className="glass-card p-4 hover:scale-[1.02] transition-transform"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 flex-1">
-                        <Avatar className="h-12 w-12">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
+                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
                           <AvatarImage src={admin.avatar} />
                           <AvatarFallback>
                             {admin.name
@@ -741,9 +741,9 @@ const SuperAdmin = () => {
                           </AvatarFallback>
                         </Avatar>
 
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{admin.name}</h3>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-sm sm:text-base">{admin.name}</h3>
                             <Badge variant="outline" className="text-xs">
                               {admin.role}
                             </Badge>
@@ -751,21 +751,21 @@ const SuperAdmin = () => {
                               {admin.status}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Mail className="w-3 h-3" />
-                              {admin.email}
+                          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1 truncate">
+                              <Mail className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate">{admin.email}</span>
                             </span>
                             <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
+                              <Calendar className="w-3 h-3 flex-shrink-0" />
                               Joined {admin.joinDate}
                             </span>
                             <span className="flex items-center gap-1">
-                              <Activity className="w-3 h-3" />
+                              <Activity className="w-3 h-3 flex-shrink-0" />
                               Active {admin.lastActive}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
                             {admin.permissions.map((perm) => (
                               <Badge
                                 key={perm}
@@ -778,8 +778,8 @@ const SuperAdmin = () => {
                           </div>
                         </div>
 
-                        <div className="text-right mr-4">
-                          <p className="text-2xl font-bold">
+                        <div className="text-left sm:text-right sm:mr-4">
+                          <p className="text-xl sm:text-2xl font-bold">
                             {admin.eventsManaged}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -886,23 +886,23 @@ const SuperAdmin = () => {
 
           {/* Permissions Tab */}
           <TabsContent value="permissions">
-            <GlassCard className="p-6">
-              <h2 className="text-2xl font-bold mb-4">Permission Management</h2>
-              <p className="text-muted-foreground mb-6">
+            <GlassCard className="p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Permission Management</h2>
+              <p className="text-sm text-muted-foreground mb-4 sm:mb-6">
                 Configure and manage permissions for different admin roles
               </p>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
                 {permissions.map((perm) => (
                   <div key={perm.id} className="glass-card p-4">
                     <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-semibold mb-1">{perm.label}</h3>
-                        <p className="text-sm text-muted-foreground">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold mb-1 text-sm sm:text-base">{perm.label}</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           {perm.description}
                         </p>
                       </div>
-                      <Lock className="w-5 h-5 text-primary" />
+                      <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0 ml-2" />
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                       <span className="text-xs text-muted-foreground">
@@ -917,7 +917,7 @@ const SuperAdmin = () => {
                       </span>
                       <Button variant="ghost" size="sm">
                         <Edit className="w-3 h-3 mr-1" />
-                        Edit
+                        <span className="text-xs sm:text-sm">Edit</span>
                       </Button>
                     </div>
                   </div>
@@ -928,9 +928,9 @@ const SuperAdmin = () => {
 
           {/* System Logs Tab */}
           <TabsContent value="system">
-            <GlassCard className="p-6">
-              <h2 className="text-2xl font-bold mb-4">System Activity Logs</h2>
-              <p className="text-muted-foreground mb-6">
+            <GlassCard className="p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">System Activity Logs</h2>
+              <p className="text-sm text-muted-foreground mb-4 sm:mb-6">
                 Monitor all system activities and admin actions
               </p>
 
@@ -940,24 +940,24 @@ const SuperAdmin = () => {
                     key={log.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="glass-card p-4 flex items-start gap-3"
+                    className="glass-card p-3 sm:p-4 flex items-start gap-2 sm:gap-3"
                   >
                     <div
-                      className={`w-2 h-2 rounded-full mt-2 ${getLogTypeColor(
+                      className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${getLogTypeColor(
                         log.type
                       )} animate-pulse`}
                     />
-                    <div className="flex-1">
-                      <p className="text-sm">{log.action}</p>
-                      <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
-                        <span>{log.user}</span>
-                        <span>•</span>
-                        <span>{log.timestamp}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm">{log.action}</p>
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-xs text-muted-foreground">
+                        <span className="truncate">{log.user}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="text-xs">{log.timestamp}</span>
                       </div>
                     </div>
                     <Badge
                       variant="outline"
-                      className={getLogTypeColor(log.type)}
+                      className={`${getLogTypeColor(log.type)} flex-shrink-0 text-xs`}
                     >
                       {log.type}
                     </Badge>
@@ -965,10 +965,11 @@ const SuperAdmin = () => {
                 ))}
               </div>
 
-              <div className="mt-6 text-center">
-                <Button variant="ghost">
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Load More Logs
+              <div className="mt-4 sm:mt-6 text-center">
+                <Button variant="ghost" size="sm" className="sm:size-default">
+                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Load More Logs</span>
+                  <span className="sm:hidden ml-2">More</span>
                 </Button>
               </div>
             </GlassCard>
@@ -976,18 +977,18 @@ const SuperAdmin = () => {
 
           {/* Platform Settings Tab */}
           <TabsContent value="settings">
-            <GlassCard className="p-6">
-              <h2 className="text-2xl font-bold mb-4">Platform Settings</h2>
-              <p className="text-muted-foreground mb-6">
+            <GlassCard className="p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Platform Settings</h2>
+              <p className="text-sm text-muted-foreground mb-4 sm:mb-6">
                 Configure global platform settings and preferences
               </p>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="glass-card p-4">
-                  <h3 className="font-semibold mb-2">Security Settings</h3>
+                  <h3 className="font-semibold mb-3 sm:mb-2 text-sm sm:text-base">Security Settings</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex-1">
                         <p className="text-sm font-medium">
                           Two-Factor Authentication
                         </p>
@@ -998,6 +999,7 @@ const SuperAdmin = () => {
                       <Button 
                         variant={platformSettings.twoFactorAuth ? "default" : "outline"} 
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => {
                           setPlatformSettings({
                             ...platformSettings,
@@ -1014,8 +1016,8 @@ const SuperAdmin = () => {
                         {platformSettings.twoFactorAuth ? "Enabled" : "Disabled"}
                       </Button>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex-1">
                         <p className="text-sm font-medium">Session Timeout</p>
                         <p className="text-xs text-muted-foreground">
                           Auto logout after inactivity
@@ -1034,7 +1036,7 @@ const SuperAdmin = () => {
                           });
                         }}
                       >
-                        <SelectTrigger className="w-32">
+                        <SelectTrigger className="w-full sm:w-32">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1049,10 +1051,10 @@ const SuperAdmin = () => {
                 </div>
 
                 <div className="glass-card p-4">
-                  <h3 className="font-semibold mb-2">Platform Features</h3>
+                  <h3 className="font-semibold mb-3 sm:mb-2 text-sm sm:text-base">Platform Features</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex-1">
                         <p className="text-sm font-medium">
                           Event Auto-Approval
                         </p>
@@ -1063,6 +1065,7 @@ const SuperAdmin = () => {
                       <Button 
                         variant={platformSettings.autoApproval ? "default" : "outline"} 
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => {
                           setPlatformSettings({
                             ...platformSettings,
@@ -1079,8 +1082,8 @@ const SuperAdmin = () => {
                         {platformSettings.autoApproval ? "Enabled" : "Disabled"}
                       </Button>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex-1">
                         <p className="text-sm font-medium">Maintenance Mode</p>
                         <p className="text-xs text-muted-foreground">
                           Put platform into maintenance mode
@@ -1089,6 +1092,7 @@ const SuperAdmin = () => {
                       <Button 
                         variant={platformSettings.maintenanceMode ? "destructive" : "outline"} 
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => {
                           setPlatformSettings({
                             ...platformSettings,
@@ -1110,10 +1114,12 @@ const SuperAdmin = () => {
                 </div>
 
                 <div className="glass-card p-4">
-                  <h3 className="font-semibold mb-2">Database Management</h3>
-                  <div className="flex gap-3 flex-wrap">
+                  <h3 className="font-semibold mb-3 sm:mb-2 text-sm sm:text-base">Database Management</h3>
+                  <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
                     <Button 
                       variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto sm:size-default"
                       onClick={() => {
                         toast({
                           title: "Database Backup Started",
@@ -1133,6 +1139,8 @@ const SuperAdmin = () => {
                     </Button>
                     <Button 
                       variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto sm:size-default"
                       onClick={() => {
                         toast({
                           title: "Clearing Cache",

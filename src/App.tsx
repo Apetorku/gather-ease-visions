@@ -11,6 +11,7 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
+import OrganizerEvents from "./pages/OrganizerEvents";
 import Admin from "./pages/Admin";
 import SuperAdmin from "./pages/SuperAdmin";
 import AttendeeProfile from "./pages/AttendeeProfile";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
+          <Route path="/organizer/events" element={<OrganizerEvents />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/superadmin" element={<SuperAdmin />} />
           <Route path="/create-event" element={<CreateEvent />} />

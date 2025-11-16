@@ -63,6 +63,8 @@ const Events = () => {
   // Check if user is logged in (using localStorage for demo)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("Guest");
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [events, setEvents] = useState<any[]>([]);
 
   // Mock notifications data
   const notifications = [
@@ -95,16 +97,80 @@ const Events = () => {
     // Check localStorage for user session
     const userSession = localStorage.getItem("userSession");
     const storedUserName = localStorage.getItem("userName");
+    const storedUserRole = localStorage.getItem("userRole");
 
     if (userSession) {
       setIsLoggedIn(true);
       setUserName(storedUserName || "User");
     }
+
+    setUserRole(storedUserRole);
+
+    // Load events from localStorage (approved events only)
+    const savedEvents = localStorage.getItem("myEvents");
+    const staticEvents = [
+      {
+        id: 1,
+        title: "Tech Summit 2025",
+        date: "March 15, 2025",
+        location: "San Francisco, CA",
+        attendees: 250,
+        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
+        category: "Technology",
+        price: "$99",
+      },
+      {
+        id: 2,
+        title: "Design Workshop",
+        date: "March 20, 2025",
+        location: "New York, NY",
+        attendees: 120,
+        image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&h=400&fit=crop",
+        category: "Design",
+        price: "$49",
+      },
+      {
+        id: 3,
+        title: "Music Festival",
+        date: "April 5, 2025",
+        location: "Los Angeles, CA",
+        attendees: 5000,
+        image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=400&fit=crop",
+        category: "Entertainment",
+        price: "$150",
+      },
+    ];
+
+    let allEvents = [...staticEvents];
+
+    if (savedEvents) {
+      try {
+        const parsedEvents = JSON.parse(savedEvents);
+        // Only show approved events to public
+        const approvedEvents = parsedEvents
+          .filter((e: any) => e.approvalStatus === "approved" || e.status === "approved")
+          .map((e: any) => ({
+            id: e.id,
+            title: e.name || e.title,
+            date: e.startDate || e.date,
+            location: e.venue || e.location || "TBA",
+            attendees: e.attendees || 0,
+            image: e.banner || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=400&fit=crop",
+            category: e.category || "General",
+            price: e.isFreeEvent ? "Free" : (e.ticketTiers?.[0]?.price ? `$${e.ticketTiers[0].price}` : "TBA"),
+          }));
+        allEvents = [...approvedEvents, ...staticEvents];
+      } catch (error) {
+        console.error("Error loading events:", error);
+      }
+    }
+
+    setEvents(allEvents);
   }, []);
 
   const handleDashboardClick = () => {
     const userRole = localStorage.getItem("userRole");
-    
+
     // Redirect based on user role
     if (userRole === "superadmin") {
       navigate("/superadmin");
@@ -144,75 +210,6 @@ const Events = () => {
     "Los Angeles, CA",
     "Chicago, IL",
     "Austin, TX",
-  ];
-
-  const events = [
-    {
-      id: 1,
-      title: "Tech Summit 2025",
-      date: "March 15, 2025",
-      location: "San Francisco, CA",
-      attendees: 250,
-      image:
-        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
-      category: "Technology",
-      price: "$99",
-    },
-    {
-      id: 2,
-      title: "Design Workshop",
-      date: "March 20, 2025",
-      location: "New York, NY",
-      attendees: 120,
-      image:
-        "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&h=400&fit=crop",
-      category: "Design",
-      price: "$49",
-    },
-    {
-      id: 3,
-      title: "Music Festival",
-      date: "April 5, 2025",
-      location: "Los Angeles, CA",
-      attendees: 5000,
-      image:
-        "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=400&fit=crop",
-      category: "Entertainment",
-      price: "$150",
-    },
-    {
-      id: 4,
-      title: "Business Conference",
-      date: "April 12, 2025",
-      location: "Chicago, IL",
-      attendees: 800,
-      image:
-        "https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&h=400&fit=crop",
-      category: "Business",
-      price: "$199",
-    },
-    {
-      id: 5,
-      title: "Art & Design Expo",
-      date: "April 18, 2025",
-      location: "Austin, TX",
-      attendees: 320,
-      image:
-        "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=800&h=400&fit=crop",
-      category: "Design",
-      price: "$75",
-    },
-    {
-      id: 6,
-      title: "Health & Wellness Summit",
-      date: "May 2, 2025",
-      location: "San Francisco, CA",
-      attendees: 450,
-      image:
-        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=400&fit=crop",
-      category: "Health",
-      price: "Free",
-    },
   ];
 
   const toggleFavorite = (eventId: number) => {
@@ -281,12 +278,15 @@ const Events = () => {
                 <Button variant="ghost" onClick={handleDashboardClick}>
                   Dashboard
                 </Button>
-                <Link to="/my-tickets">
-                  <Button variant="ghost" className="hidden sm:flex">
-                    <Ticket className="w-4 h-4 mr-2" />
-                    My Tickets
-                  </Button>
-                </Link>
+                {/* Only show My Tickets for attendees, not for organizers/admins */}
+                {userRole !== "organizer" && userRole !== "admin" && userRole !== "superadmin" && (
+                  <Link to="/my-tickets">
+                    <Button variant="ghost" className="hidden sm:flex">
+                      <Ticket className="w-4 h-4 mr-2" />
+                      My Tickets
+                    </Button>
+                  </Link>
+                )}
 
                 {/* Notification Bell */}
                 <DropdownMenu
@@ -378,10 +378,13 @@ const Events = () => {
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/my-tickets")}>
-                      <Ticket className="mr-2 h-4 w-4" />
-                      <span>My Tickets</span>
-                    </DropdownMenuItem>
+                    {/* Only show My Tickets for attendees, not for organizers/admins */}
+                    {userRole !== "organizer" && userRole !== "admin" && userRole !== "superadmin" && (
+                      <DropdownMenuItem onClick={() => navigate("/my-tickets")}>
+                        <Ticket className="mr-2 h-4 w-4" />
+                        <span>My Tickets</span>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={handleDashboardClick}>
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>

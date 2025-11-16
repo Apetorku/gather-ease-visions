@@ -1,11 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/GlassCard";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
 import {
   Calendar,
   MapPin,
@@ -23,16 +31,22 @@ import {
   Star,
   MessageCircle,
   ExternalLink,
+  QrCode,
 } from "lucide-react";
 
 const EventDetail = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [isFavorited, setIsFavorited] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
+  const [event, setEvent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [showTicketDialog, setShowTicketDialog] = useState(false);
+  const [generatedTicket, setGeneratedTicket] = useState<any>(null);
 
   const handleDashboardClick = () => {
     const userRole = localStorage.getItem("userRole");
-    
+
     // Redirect based on user role
     if (userRole === "superadmin") {
       navigate("/superadmin");
@@ -45,83 +59,259 @@ const EventDetail = () => {
     }
   };
 
-  const event = {
-    id: 1,
-    title: "Tech Innovation Summit 2025",
-    category: "Technology",
-    date: "March 15, 2025",
-    time: "9:00 AM - 5:00 PM",
-    location: "Silicon Valley Convention Center",
-    address: "123 Tech Drive, San Jose, CA 95110",
-    attendees: 1250,
-    capacity: 1500,
-    image:
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
-    organizer: {
-      name: "Tech Events Inc.",
-      avatar: "https://api.dicebear.com/7.x/initials/svg?seed=TechEvents",
-      verified: true,
-    },
-    description: `Join us for the most anticipated technology conference of the year! The Tech Innovation Summit brings together industry leaders, innovators, and entrepreneurs to explore the latest trends and breakthrough technologies shaping our future.
+  // Load event data based on ID from URL
+  useEffect(() => {
+    const loadEvent = () => {
+      // Static demo events
+      const staticEvents = [
+        {
+          id: 1,
+          title: "Tech Innovation Summit 2025",
+          category: "Technology",
+          date: "March 15, 2025",
+          time: "9:00 AM - 5:00 PM",
+          location: "Silicon Valley Convention Center",
+          address: "123 Tech Drive, San Jose, CA 95110",
+          attendees: 1250,
+          capacity: 1500,
+          price: "$199",
+          image:
+            "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
+          organizer: {
+            name: "Tech Events Inc.",
+            avatar: "https://api.dicebear.com/7.x/initials/svg?seed=TechEvents",
+            verified: true,
+          },
+          description: `Join us for the most anticipated technology conference of the year! The Tech Innovation Summit brings together industry leaders, innovators, and entrepreneurs to explore the latest trends and breakthrough technologies shaping our future.
 
 This full-day event features keynote speeches from renowned tech leaders, interactive workshops, networking sessions, and an exhibition showcasing cutting-edge products and services.`,
-    highlights: [
-      "Keynote speeches from industry leaders",
-      "20+ interactive workshops and sessions",
-      "Networking opportunities with 1500+ attendees",
-      "Exhibition hall with 50+ exhibitors",
-      "Lunch and refreshments included",
-      "Certificate of participation",
-    ],
-    agenda: [
-      { time: "9:00 AM", title: "Registration & Welcome Coffee" },
-      { time: "10:00 AM", title: "Opening Keynote: The Future of AI" },
-      { time: "11:30 AM", title: "Workshop Sessions (Track A, B, C)" },
-      { time: "1:00 PM", title: "Networking Lunch" },
-      { time: "2:30 PM", title: "Panel Discussion: Sustainable Tech" },
-      { time: "4:00 PM", title: "Closing Remarks & Awards" },
-    ],
-    tickets: [
-      {
-        id: "early-bird",
-        type: "Early Bird",
-        price: 99,
-        description: "Limited time offer - Save 50%",
-        available: 25,
-        features: [
-          "Full access",
-          "Workshop materials",
-          "Lunch included",
-          "Networking session",
-        ],
-      },
-      {
-        id: "standard",
-        type: "Standard Pass",
-        price: 149,
-        description: "Regular admission ticket",
-        available: 180,
-        features: ["Full access", "Workshop materials", "Lunch included"],
-      },
-      {
-        id: "vip",
-        type: "VIP Pass",
-        price: 299,
-        description: "Premium experience with exclusive perks",
-        available: 45,
-        features: [
-          "Priority seating",
-          "VIP lounge access",
-          "Meet & greet with speakers",
-          "Premium lunch",
-          "Exclusive swag bag",
-        ],
-      },
-    ],
+          highlights: [
+            "Keynote speeches from industry leaders",
+            "20+ interactive workshops and sessions",
+            "Networking opportunities with 1500+ attendees",
+            "Exhibition hall with 50+ exhibitors",
+            "Lunch and refreshments included",
+            "Certificate of participation",
+          ],
+          agenda: [
+            { time: "9:00 AM", title: "Registration & Welcome Coffee" },
+            { time: "10:00 AM", title: "Opening Keynote: The Future of AI" },
+            { time: "11:30 AM", title: "Workshop Sessions (Track A, B, C)" },
+            { time: "1:00 PM", title: "Networking Lunch" },
+            { time: "2:30 PM", title: "Panel Discussion: Sustainable Tech" },
+            { time: "4:00 PM", title: "Closing Remarks & Awards" },
+          ],
+          tickets: [
+            {
+              id: "early-bird",
+              type: "Early Bird",
+              price: 99,
+              description: "Limited time offer - Save 50%",
+              available: 25,
+              features: [
+                "Full access",
+                "Workshop materials",
+                "Lunch included",
+                "Networking session",
+              ],
+            },
+            {
+              id: "standard",
+              type: "Standard Pass",
+              price: 149,
+              description: "Regular admission ticket",
+              available: 180,
+              features: ["Full access", "Workshop materials", "Lunch included"],
+            },
+            {
+              id: "vip",
+              type: "VIP Pass",
+              price: 299,
+              description: "Premium experience with exclusive perks",
+              available: 45,
+              features: [
+                "Priority seating",
+                "VIP lounge access",
+                "Meet & greet with speakers",
+                "Premium lunch",
+                "Exclusive swag bag",
+              ],
+            },
+          ],
+        },
+      ];
+
+      // Try to load from localStorage first
+      const savedEvents = localStorage.getItem("myEvents");
+      let allEvents = [...staticEvents];
+
+      if (savedEvents) {
+        try {
+          const parsedEvents = JSON.parse(savedEvents);
+          // Map saved events to the expected format
+          const mappedEvents = parsedEvents.map((evt: any) => ({
+            id: evt.id,
+            title: evt.name || evt.title,
+            category: evt.category || "General",
+            date: evt.startDate || evt.date,
+            time: evt.startTime
+              ? `${evt.startTime} - ${evt.endTime || ""}`
+              : "TBA",
+            location: evt.venue || evt.location,
+            address: evt.address || evt.venue,
+            attendees: evt.attendees || 0,
+            capacity: evt.capacity || 100,
+            price: evt.isFreeEvent
+              ? "Free"
+              : evt.ticketTiers?.[0]?.price
+              ? `$${evt.ticketTiers[0].price}`
+              : "TBA",
+            image:
+              evt.banner ||
+              evt.image ||
+              "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=400&fit=crop",
+            organizer: {
+              name: evt.createdBy || "Event Organizer",
+              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${
+                evt.createdBy || "Organizer"
+              }`,
+              verified: true,
+            },
+            description: evt.description || "No description available.",
+            highlights: evt.highlights || [
+              "Exciting event experience",
+              "Great networking opportunities",
+              "Professional organization",
+            ],
+            agenda: evt.agenda || [
+              { time: "TBA", title: "Event Schedule Coming Soon" },
+            ],
+            tickets: evt.ticketTiers?.map((tier: any, index: number) => ({
+              id: `ticket-${index}`,
+              type: tier.name,
+              price: tier.price,
+              description: tier.description || `${tier.name} ticket`,
+              available: tier.quantity,
+              features: tier.features || ["Event access"],
+            })) || [
+              {
+                id: "general",
+                type: "General Admission",
+                price: 0,
+                description: "Standard event access",
+                available: evt.capacity || 100,
+                features: ["Event access"],
+              },
+            ],
+            isFreeEvent: evt.isFreeEvent,
+          }));
+          allEvents = [...mappedEvents, ...staticEvents];
+        } catch (error) {
+          console.error("Error parsing events from localStorage:", error);
+        }
+      }
+
+      // Find the event by ID
+      const foundEvent = allEvents.find((evt) => evt.id.toString() === id);
+
+      if (foundEvent) {
+        setEvent(foundEvent);
+      } else {
+        // Event not found, redirect back
+        navigate("/events");
+      }
+
+      setLoading(false);
+    };
+
+    loadEvent();
+  }, [id, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading event details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return null;
+  }
+
+  // Check if the selected ticket is free
+  const selectedTicketData = event.tickets.find(
+    (t: any) => t.id === selectedTicket
+  );
+  const isFreeEvent =
+    selectedTicketData?.price === 0 ||
+    event.price === "Free" ||
+    event.isFreeEvent;
+
+  // Generate ticket number
+  const generateTicketNumber = () => {
+    const eventCode = event.title.substring(0, 3).toUpperCase();
+    const ticketCode =
+      selectedTicketData?.type.substring(0, 3).toUpperCase() || "GEN";
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    return `${eventCode}-${ticketCode}-${randomNum}`;
   };
 
   const handlePurchase = () => {
-    if (selectedTicket) {
+    if (!selectedTicket) return;
+
+    const userSession = localStorage.getItem("userSession");
+    if (!userSession) {
+      toast({
+        title: "Login Required",
+        description: "Please login to get your ticket",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
+    if (isFreeEvent) {
+      // Generate free ticket
+      const ticketNumber = generateTicketNumber();
+      const userName = localStorage.getItem("userName") || "Guest";
+
+      const newTicket = {
+        id: Date.now(),
+        eventId: event.id,
+        eventTitle: event.title,
+        eventDate: event.date,
+        eventTime: event.time,
+        location: event.location,
+        ticketType: selectedTicketData.type,
+        ticketNumber: ticketNumber,
+        qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${ticketNumber}`,
+        status: "active",
+        purchaseDate: new Date().toLocaleDateString(),
+        price: 0,
+        attendeeName: userName,
+      };
+
+      // Save to localStorage
+      const existingTickets = JSON.parse(
+        localStorage.getItem("myTickets") || "[]"
+      );
+      existingTickets.push(newTicket);
+      localStorage.setItem("myTickets", JSON.stringify(existingTickets));
+
+      // Show ticket dialog
+      setGeneratedTicket(newTicket);
+      setShowTicketDialog(true);
+
+      toast({
+        title: "Ticket Registered!",
+        description: `Your free ticket ${ticketNumber} has been generated`,
+      });
+    } else {
+      // Navigate to checkout for paid tickets
       navigate("/checkout");
     }
   };
@@ -419,7 +609,9 @@ This full-day event features keynote speeches from renowned tech leaders, intera
                             {ticket.description}
                           </p>
                         </div>
-                        <p className="text-2xl font-bold">${ticket.price}</p>
+                        <p className="text-2xl font-bold">
+                          {ticket.price === 0 ? "Free" : `$${ticket.price}`}
+                        </p>
                       </div>
                       <p className="text-sm text-muted-foreground mb-3">
                         {ticket.available} tickets left
@@ -446,8 +638,22 @@ This full-day event features keynote speeches from renowned tech leaders, intera
                   disabled={!selectedTicket}
                   onClick={handlePurchase}
                 >
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  {selectedTicket ? "Purchase Ticket" : "Select a Ticket"}
+                  {!selectedTicket ? (
+                    <>
+                      <Ticket className="w-5 h-5 mr-2" />
+                      Select a Ticket
+                    </>
+                  ) : isFreeEvent ? (
+                    <>
+                      <Ticket className="w-5 h-5 mr-2" />
+                      Get Ticket
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-5 h-5 mr-2" />
+                      Purchase Ticket
+                    </>
+                  )}
                 </Button>
 
                 <div className="grid grid-cols-2 gap-2 mb-4">
@@ -571,6 +777,97 @@ This full-day event features keynote speeches from renowned tech leaders, intera
           </div>
         </div>
       </div>
+
+      {/* Free Ticket Registration Success Dialog */}
+      <Dialog open={showTicketDialog} onOpenChange={setShowTicketDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl">
+              🎉 Ticket Registered!
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Your free ticket has been generated successfully
+            </DialogDescription>
+          </DialogHeader>
+
+          {generatedTicket && (
+            <div className="space-y-4">
+              {/* Ticket Details */}
+              <GlassCard className="p-6 text-center">
+                <div className="mb-4">
+                  <h3 className="font-bold text-lg mb-1">
+                    {generatedTicket.eventTitle}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {generatedTicket.eventDate} • {generatedTicket.eventTime}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {generatedTicket.location}
+                  </p>
+                </div>
+
+                <Badge variant="outline" className="mb-4 text-lg px-4 py-2">
+                  {generatedTicket.ticketType}
+                </Badge>
+
+                <div className="my-4 p-4 bg-white rounded-lg">
+                  <img
+                    src={generatedTicket.qrCode}
+                    alt="QR Code"
+                    className="w-48 h-48 mx-auto"
+                  />
+                </div>
+
+                <div className="text-center mb-2">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Ticket Number
+                  </p>
+                  <p className="font-mono font-bold text-lg">
+                    {generatedTicket.ticketNumber}
+                  </p>
+                </div>
+
+                <p className="text-xs text-muted-foreground mt-4">
+                  Show this QR code at the event entrance
+                </p>
+              </GlassCard>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    navigate("/my-tickets");
+                  }}
+                >
+                  <Ticket className="w-4 h-4 mr-2" />
+                  View Tickets
+                </Button>
+                <Button
+                  variant="gradient"
+                  onClick={() => {
+                    setShowTicketDialog(false);
+                    toast({
+                      title: "Ticket Saved",
+                      description:
+                        "You can view your ticket anytime in My Tickets",
+                    });
+                  }}
+                >
+                  Done
+                </Button>
+              </div>
+
+              <p className="text-xs text-center text-muted-foreground">
+                Your ticket has been saved to{" "}
+                <Link to="/my-tickets" className="text-primary hover:underline">
+                  My Tickets
+                </Link>
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

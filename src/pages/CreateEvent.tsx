@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -28,9 +29,55 @@ import {
 
 const CreateEvent = () => {
   const navigate = useNavigate();
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isFreeEvent, setIsFreeEvent] = useState(false);
   const [ticketTiers, setTicketTiers] = useState([
     { id: 1, name: "General Admission", price: "", quantity: "" },
   ]);
+
+  // Form state
+  const [formData, setFormData] = useState({
+    title: "",
+    category: "",
+    description: "",
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
+    venue: "",
+    address: "",
+    city: "",
+    stateRegion: "",
+  });
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File size must be less than 5MB");
+        return;
+      }
+
+      // Check file type
+      const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+      if (!validTypes.includes(file.type)) {
+        alert("Please upload a PNG, JPG, or WEBP image");
+        return;
+      }
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+  };
 
   const addTicketTier = () => {
     setTicketTiers([
@@ -41,6 +88,114 @@ const CreateEvent = () => {
 
   const removeTicketTier = (id: number) => {
     setTicketTiers(ticketTiers.filter((tier) => tier.id !== id));
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSelectChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleTicketTierChange = (id: number, field: string, value: string) => {
+    setTicketTiers((prevTiers) =>
+      prevTiers.map((tier) =>
+        tier.id === id ? { ...tier, [field]: value } : tier
+      )
+    );
+  };
+
+  const saveEventToLocalStorage = (status: "draft" | "published") => {
+    // Validation
+    if (!formData.title || !formData.category || !formData.description) {
+      toast({
+        title: "Validation Error",
+        description:
+          "Please fill in all required fields (Title, Category, Description)",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Get existing events from localStorage
+    const existingEvents = JSON.parse(localStorage.getItem("myEvents") || "[]");
+
+    // Calculate total revenue from ticket tiers
+    const totalRevenue = isFreeEvent
+      ? 0
+      : ticketTiers.reduce((sum, tier) => {
+          const price = parseFloat(tier.price) || 0;
+          const quantity = parseInt(tier.quantity) || 0;
+          return sum + price * quantity;
+        }, 0);
+
+    // Create new event object
+    const newEvent = {
+      id: Date.now(),
+      name: formData.title,
+      category: formData.category,
+      description: formData.description,
+      date: formData.startDate
+        ? new Date(formData.startDate).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "TBD",
+      startDate: formData.startDate,
+      startTime: formData.startTime,
+      endDate: formData.endDate,
+      endTime: formData.endTime,
+      venue: formData.venue || "TBD",
+      address: formData.address || "",
+      city: formData.city || "",
+      stateRegion: formData.stateRegion || "",
+      attendees: 0,
+      revenue: `$${totalRevenue.toLocaleString()}`,
+      status: status === "published" ? "pending" : "draft", // Changed from "active" to "pending" - requires admin approval
+      approvalStatus: status === "published" ? "pending" : null, // Track approval separately
+      checkInRate: 0,
+      isFreeEvent,
+      ticketTiers: ticketTiers,
+      banner: imagePreview || "",
+      createdAt: new Date().toISOString(),
+      createdBy: localStorage.getItem("userName") || "Organizer",
+    };
+
+    // Add new event to the array
+    const updatedEvents = [...existingEvents, newEvent];
+
+    // Save to localStorage
+    localStorage.setItem("myEvents", JSON.stringify(updatedEvents));
+
+    return true;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (saveEventToLocalStorage("published")) {
+      toast({
+        title: "Event Submitted for Approval",
+        description:
+          "Your event has been submitted and is pending admin approval before it will be visible to attendees.",
+      });
+      navigate("/organizer-dashboard");
+    }
+  };
+
+  const handleSaveAsDraft = () => {
+    if (saveEventToLocalStorage("draft")) {
+      toast({
+        title: "Draft Saved",
+        description: "Your event has been saved as a draft.",
+      });
+      navigate("/organizer-dashboard");
+    }
   };
 
   return (
@@ -79,7 +234,7 @@ const CreateEvent = () => {
           </p>
         </motion.div>
 
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Basic Information */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -96,13 +251,22 @@ const CreateEvent = () => {
                     id="title"
                     placeholder="Enter event title"
                     className="mt-2 glass-card border-white/20"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    required
                   />
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="category">Category *</Label>
-                    <Select>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) =>
+                        handleSelectChange("category", value)
+                      }
+                      required
+                    >
                       <SelectTrigger className="mt-2 glass-card border-white/20">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -116,20 +280,6 @@ const CreateEvent = () => {
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div>
-                    <Label htmlFor="status">Status *</Label>
-                    <Select defaultValue="draft">
-                      <SelectTrigger className="mt-2 glass-card border-white/20">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="published">Published</SelectItem>
-                        <SelectItem value="archived">Archived</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
 
                 <div>
@@ -138,19 +288,53 @@ const CreateEvent = () => {
                     id="description"
                     placeholder="Describe your event..."
                     className="mt-2 glass-card border-white/20 min-h-32"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    required
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="banner">Event Banner</Label>
-                  <div className="mt-2 border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-white/40 transition-colors cursor-pointer">
-                    <ImageIcon className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Click to upload or drag and drop
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      PNG, JPG or WEBP (max. 5MB)
-                    </p>
+                  <div className="mt-2">
+                    {imagePreview ? (
+                      <div className="relative border-2 border-white/20 rounded-xl overflow-hidden">
+                        <img
+                          src={imagePreview}
+                          alt="Event banner preview"
+                          className="w-full h-64 object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2"
+                          onClick={removeImage}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <label
+                        htmlFor="banner-upload"
+                        className="block border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-white/40 transition-colors cursor-pointer"
+                      >
+                        <ImageIcon className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Click to upload or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          PNG, JPG or WEBP (max. 5MB)
+                        </p>
+                        <input
+                          id="banner-upload"
+                          type="file"
+                          accept="image/png,image/jpeg,image/jpg,image/webp"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                      </label>
+                    )}
                   </div>
                 </div>
               </div>
@@ -174,6 +358,8 @@ const CreateEvent = () => {
                       id="startDate"
                       type="datetime-local"
                       className="mt-2 glass-card border-white/20"
+                      value={formData.startDate}
+                      onChange={handleInputChange}
                     />
                   </div>
 
@@ -183,6 +369,8 @@ const CreateEvent = () => {
                       id="endDate"
                       type="datetime-local"
                       className="mt-2 glass-card border-white/20"
+                      value={formData.endDate}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
@@ -193,6 +381,8 @@ const CreateEvent = () => {
                     id="venue"
                     placeholder="Enter venue name"
                     className="mt-2 glass-card border-white/20"
+                    value={formData.venue}
+                    onChange={handleInputChange}
                   />
                 </div>
 
@@ -202,34 +392,31 @@ const CreateEvent = () => {
                     id="address"
                     placeholder="Enter full address"
                     className="mt-2 glass-card border-white/20"
+                    value={formData.address}
+                    onChange={handleInputChange}
                   />
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-4">
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="city">City *</Label>
                     <Input
                       id="city"
                       placeholder="City"
                       className="mt-2 glass-card border-white/20"
+                      value={formData.city}
+                      onChange={handleInputChange}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="state">State/Province *</Label>
+                    <Label htmlFor="stateRegion">State/Region *</Label>
                     <Input
-                      id="state"
-                      placeholder="State"
+                      id="stateRegion"
+                      placeholder="State/Region"
                       className="mt-2 glass-card border-white/20"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="zip">ZIP/Postal Code *</Label>
-                    <Input
-                      id="zip"
-                      placeholder="ZIP"
-                      className="mt-2 glass-card border-white/20"
+                      value={formData.stateRegion}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
@@ -265,7 +452,10 @@ const CreateEvent = () => {
                       Make this a free RSVP event
                     </p>
                   </div>
-                  <Switch />
+                  <Switch
+                    checked={isFreeEvent}
+                    onCheckedChange={setIsFreeEvent}
+                  />
                 </div>
 
                 {ticketTiers.map((tier, index) => (
@@ -293,17 +483,35 @@ const CreateEvent = () => {
                         <Input
                           placeholder="e.g., VIP Pass"
                           className="mt-2 glass-card border-white/20"
+                          value={tier.name}
+                          onChange={(e) =>
+                            handleTicketTierChange(
+                              tier.id,
+                              "name",
+                              e.target.value
+                            )
+                          }
                         />
                       </div>
 
-                      <div>
-                        <Label>Price ($)</Label>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          className="mt-2 glass-card border-white/20"
-                        />
-                      </div>
+                      {!isFreeEvent && (
+                        <div>
+                          <Label>Price ($)</Label>
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            className="mt-2 glass-card border-white/20"
+                            value={tier.price}
+                            onChange={(e) =>
+                              handleTicketTierChange(
+                                tier.id,
+                                "price",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                      )}
 
                       <div>
                         <Label>Quantity</Label>
@@ -311,6 +519,14 @@ const CreateEvent = () => {
                           type="number"
                           placeholder="100"
                           className="mt-2 glass-card border-white/20"
+                          value={tier.quantity}
+                          onChange={(e) =>
+                            handleTicketTierChange(
+                              tier.id,
+                              "quantity",
+                              e.target.value
+                            )
+                          }
                         />
                       </div>
                     </div>
@@ -328,63 +544,6 @@ const CreateEvent = () => {
             </GlassCard>
           </motion.div>
 
-          {/* Additional Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <GlassCard className="p-6">
-              <h2 className="text-2xl font-bold mb-6">Additional Settings</h2>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
-                  <div>
-                    <p className="font-semibold mb-1">
-                      Require Registration Approval
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Manually approve each registration
-                    </p>
-                  </div>
-                  <Switch />
-                </div>
-
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
-                  <div>
-                    <p className="font-semibold mb-1">Enable Waitlist</p>
-                    <p className="text-sm text-muted-foreground">
-                      Allow attendees to join a waitlist when sold out
-                    </p>
-                  </div>
-                  <Switch />
-                </div>
-
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
-                  <div>
-                    <p className="font-semibold mb-1">
-                      Send Reminder Notifications
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically notify attendees before the event
-                    </p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-
-                <div>
-                  <Label htmlFor="capacity">Event Capacity</Label>
-                  <Input
-                    id="capacity"
-                    type="number"
-                    placeholder="Maximum number of attendees"
-                    className="mt-2 glass-card border-white/20"
-                  />
-                </div>
-              </div>
-            </GlassCard>
-          </motion.div>
-
           {/* Action Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -392,7 +551,12 @@ const CreateEvent = () => {
             transition={{ delay: 0.5 }}
             className="flex flex-col sm:flex-row gap-4 justify-end"
           >
-            <Button variant="outline" size="lg" type="button">
+            <Button
+              variant="outline"
+              size="lg"
+              type="button"
+              onClick={handleSaveAsDraft}
+            >
               Save as Draft
             </Button>
             <Button variant="gradient" size="lg" type="submit">
