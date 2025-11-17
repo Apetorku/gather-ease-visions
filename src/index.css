@@ -8,69 +8,77 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Fintech AI Neo-gradient Palette - Light Mode */
-    --background: 217 71% 92%;
-    --foreground: 220 20% 15%;
+    /* Fintech AI Core Colors */
+    --background: 220 45% 8%;
+    --background-start: 220 45% 8%;
+    --background-end: 220 45% 12%;
+    --foreground: 220 15% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 15%;
+    --card: 220 40% 12% / 0.5;
+    --card-hover: 220 40% 15%;
+    --card-foreground: 220 15% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 15%;
+    --popover: 220 40% 12%;
+    --popover-foreground: 220 15% 95%;
 
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 217 91% 70%;
+    --primary-variant: 267 85% 65%;
 
     --secondary: 167 85% 55%;
-    --secondary-foreground: 220 30% 10%;
+    --secondary-foreground: 0 0% 100%;
     --secondary-glow: 167 85% 65%;
 
-    --muted: 220 15% 92%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 220 30% 18%;
+    --muted-foreground: 220 15% 65%;
 
-    --accent: 267 85% 65%;
+    --accent: 267 85% 70%;
     --accent-foreground: 0 0% 100%;
-    --accent-glow: 267 85% 75%;
+    --accent-glow: 267 85% 80%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 85%;
-    --input: 220 20% 90%;
-    --ring: 217 91% 60%;
+    --border: 0 0% 100% / 0.1;
+    --input: 220 35% 20% / 0.5;
+    --ring: 217 91% 65%;
 
-    --radius: 1.25rem;
+    --radius: 1rem;
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(267 85% 65%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(167 85% 55%) 0%, hsl(217 91% 60%) 100%);
-    --gradient-glow: radial-gradient(circle at 50% 0%, hsl(217 91% 70% / 0.3) 0%, transparent 70%);
+    --gradient-glass: linear-gradient(135deg, hsl(220 40% 12% / 0.5) 0%, hsl(220 40% 15% / 0.3) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(220 45% 8%) 0%, hsl(220 45% 12%) 100%);
 
-    /* 3D Depth Shadows */
-    --shadow-elevation-1: 0 2px 8px hsl(217 91% 30% / 0.08);
-    --shadow-elevation-2: 0 4px 16px hsl(217 91% 30% / 0.12), 0 2px 4px hsl(217 91% 30% / 0.08);
-    --shadow-elevation-3: 0 8px 24px hsl(217 91% 30% / 0.16), 0 4px 8px hsl(217 91% 30% / 0.08);
-    --shadow-glow-primary: 0 0 40px hsl(217 91% 60% / 0.25);
-    --shadow-glow-secondary: 0 0 40px hsl(167 85% 55% / 0.25);
-    --shadow-glow-accent: 0 0 40px hsl(267 85% 65% / 0.25);
+    /* 3D Shadows */
+    --shadow-3d: 0 8px 32px hsl(220 50% 5% / 0.6), 0 4px 8px hsl(220 50% 5% / 0.4);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --shadow-glow: 0 0 50px hsl(217 91% 60% / 0.35);
+    --shadow-glow-sm: 0 0 20px hsl(217 91% 60% / 0.25);
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 20% 15%;
-    --sidebar-primary: 217 91% 60%;
+    /* Backdrop Blur */
+    --blur-glass: 24px;
+
+    --sidebar-background: 220 40% 10%;
+    --sidebar-foreground: 220 15% 95%;
+    --sidebar-primary: 217 91% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 95%;
-    --sidebar-accent-foreground: 220 20% 15%;
-    --sidebar-border: 220 20% 88%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-accent: 220 35% 18%;
+    --sidebar-accent-foreground: 220 15% 95%;
+    --sidebar-border: 220 35% 22%;
+    --sidebar-ring: 217 91% 65%;
   }
 
   .dark {
-    /* Fintech AI Neo-gradient Palette - Dark Mode (Deep Navy Base) */
-    --background: 217 71% 12%;
+    /* Dark mode uses same colors as base */
+    --background: 220 45% 8%;
+    --background-start: 220 45% 8%;
+    --background-end: 220 45% 12%;
     --foreground: 220 15% 95%;
 
-    --card: 220 40% 12%;
+    --card: 220 40% 12% / 0.5;
+    --card-hover: 220 40% 15%;
     --card-foreground: 220 15% 95%;
 
     --popover: 220 40% 12%;
@@ -79,6 +87,7 @@ All colors MUST be HSL.
     --primary: 217 91% 65%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 217 91% 75%;
+    --primary-variant: 267 85% 70%;
 
     --secondary: 167 85% 60%;
     --secondary-foreground: 0 0% 100%;
@@ -94,22 +103,18 @@ All colors MUST be HSL.
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 35% 22%;
-    --input: 220 35% 20%;
+    --border: 0 0% 100% / 0.1;
+    --input: 220 35% 20% / 0.5;
     --ring: 217 91% 65%;
 
-    /* Dark Mode Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(217 91% 65%) 0%, hsl(267 85% 70%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(167 85% 60%) 0%, hsl(217 91% 65%) 100%);
-    --gradient-glow: radial-gradient(circle at 50% 0%, hsl(217 91% 70% / 0.2) 0%, transparent 70%);
+    --gradient-glass: linear-gradient(135deg, hsl(220 40% 12% / 0.5) 0%, hsl(220 40% 15% / 0.3) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(220 45% 8%) 0%, hsl(220 45% 12%) 100%);
 
-    /* Dark Mode 3D Shadows */
-    --shadow-elevation-1: 0 2px 8px hsl(220 50% 5% / 0.4);
-    --shadow-elevation-2: 0 4px 16px hsl(220 50% 5% / 0.5), 0 2px 4px hsl(220 50% 5% / 0.3);
-    --shadow-elevation-3: 0 8px 24px hsl(220 50% 5% / 0.6), 0 4px 8px hsl(220 50% 5% / 0.4);
-    --shadow-glow-primary: 0 0 50px hsl(217 91% 60% / 0.35);
-    --shadow-glow-secondary: 0 0 50px hsl(167 85% 55% / 0.35);
-    --shadow-glow-accent: 0 0 50px hsl(267 85% 65% / 0.35);
+    --shadow-3d: 0 8px 32px hsl(220 50% 5% / 0.6), 0 4px 8px hsl(220 50% 5% / 0.4);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --shadow-glow: 0 0 50px hsl(217 91% 60% / 0.35);
+    --shadow-glow-sm: 0 0 20px hsl(217 91% 60% / 0.25);
 
     --sidebar-background: 220 40% 10%;
     --sidebar-foreground: 220 15% 95%;
@@ -134,36 +139,36 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
-  /* Fintech AI Glassmorphism Card */
+  /* Glassmorphism Card */
   .glass-card {
-    @apply rounded-3xl bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/30 dark:border-white/10;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    background: var(--gradient-glass);
+    backdrop-filter: blur(var(--blur-glass));
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    box-shadow: var(--shadow-glass);
   }
 
-  /* 3D Elevation Utilities */
-  .elevation-1 {
-    box-shadow: var(--shadow-elevation-1);
+  /* Backdrop Blur */
+  .backdrop-blur-glass {
+    backdrop-filter: blur(var(--blur-glass));
   }
 
-  .elevation-2 {
-    box-shadow: var(--shadow-elevation-2);
+  /* 3D Shadow */
+  .shadow-3d {
+    box-shadow: var(--shadow-3d);
   }
 
-  .elevation-3 {
-    box-shadow: var(--shadow-elevation-3);
+  .shadow-glass {
+    box-shadow: var(--shadow-glass);
   }
 
   /* Glow Effects */
-  .glow-primary {
-    box-shadow: var(--shadow-glow-primary);
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
   }
 
-  .glow-secondary {
-    box-shadow: var(--shadow-glow-secondary);
-  }
-
-  .glow-accent {
-    box-shadow: var(--shadow-glow-accent);
+  .shadow-glow-sm {
+    box-shadow: var(--shadow-glow-sm);
   }
 
   /* Gradient Backgrounds */
@@ -171,63 +176,16 @@ All colors MUST be HSL.
     background: var(--gradient-primary);
   }
 
-  .gradient-secondary {
-    background: var(--gradient-secondary);
+  .gradient-glass {
+    background: var(--gradient-glass);
   }
 
-  /* Premium Hover Lift */
-  .hover-lift {
-    @apply transition-all duration-300 ease-out;
+  .gradient-subtle {
+    background: var(--gradient-subtle);
   }
 
-  .hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-elevation-3);
-  }
-
-  /* Glow Pulse Animation */
-  .glow-pulse {
-    animation: glow-pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes glow-pulse {
-    0%, 100% {
-      box-shadow: var(--shadow-glow-primary);
-    }
-    50% {
-      box-shadow: 0 0 60px hsl(var(--primary) / 0.4);
-    }
-  }
-  
+  /* Perspective for 3D effects */
   .perspective-1000 {
     perspective: 1000px;
-  }
-  
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient 8s ease infinite;
-  }
-  
-  @keyframes gradient {
-    0%, 100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-  }
-
-  /* Floating Animation */
-  .float-animation {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-20px);
-    }
   }
 }
