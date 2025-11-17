@@ -115,7 +115,8 @@ const Events = () => {
         date: "March 15, 2025",
         location: "San Francisco, CA",
         attendees: 250,
-        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
+        image:
+          "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
         category: "Technology",
         price: "$99",
       },
@@ -125,7 +126,8 @@ const Events = () => {
         date: "March 20, 2025",
         location: "New York, NY",
         attendees: 120,
-        image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&h=400&fit=crop",
+        image:
+          "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&h=400&fit=crop",
         category: "Design",
         price: "$49",
       },
@@ -135,7 +137,8 @@ const Events = () => {
         date: "April 5, 2025",
         location: "Los Angeles, CA",
         attendees: 5000,
-        image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=400&fit=crop",
+        image:
+          "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=400&fit=crop",
         category: "Entertainment",
         price: "$150",
       },
@@ -148,16 +151,25 @@ const Events = () => {
         const parsedEvents = JSON.parse(savedEvents);
         // Only show approved events to public
         const approvedEvents = parsedEvents
-          .filter((e: any) => e.approvalStatus === "approved" || e.status === "approved")
+          .filter(
+            (e: any) =>
+              e.approvalStatus === "approved" || e.status === "approved"
+          )
           .map((e: any) => ({
             id: e.id,
             title: e.name || e.title,
             date: e.startDate || e.date,
             location: e.venue || e.location || "TBA",
             attendees: e.attendees || 0,
-            image: e.banner || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=400&fit=crop",
+            image:
+              e.banner ||
+              "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=400&fit=crop",
             category: e.category || "General",
-            price: e.isFreeEvent ? "Free" : (e.ticketTiers?.[0]?.price ? `$${e.ticketTiers[0].price}` : "TBA"),
+            price: e.isFreeEvent
+              ? "Free"
+              : e.ticketTiers?.[0]?.price
+              ? `$${e.ticketTiers[0].price}`
+              : "TBA",
           }));
         allEvents = [...approvedEvents, ...staticEvents];
       } catch (error) {
@@ -279,14 +291,16 @@ const Events = () => {
                   Dashboard
                 </Button>
                 {/* Only show My Tickets for attendees, not for organizers/admins */}
-                {userRole !== "organizer" && userRole !== "admin" && userRole !== "superadmin" && (
-                  <Link to="/my-tickets">
-                    <Button variant="ghost" className="hidden sm:flex">
-                      <Ticket className="w-4 h-4 mr-2" />
-                      My Tickets
-                    </Button>
-                  </Link>
-                )}
+                {userRole !== "organizer" &&
+                  userRole !== "admin" &&
+                  userRole !== "superadmin" && (
+                    <Link to="/my-tickets">
+                      <Button variant="ghost" className="hidden sm:flex">
+                        <Ticket className="w-4 h-4 mr-2" />
+                        My Tickets
+                      </Button>
+                    </Link>
+                  )}
 
                 {/* Notification Bell */}
                 <DropdownMenu
@@ -379,12 +393,16 @@ const Events = () => {
                       <span>Profile</span>
                     </DropdownMenuItem>
                     {/* Only show My Tickets for attendees, not for organizers/admins */}
-                    {userRole !== "organizer" && userRole !== "admin" && userRole !== "superadmin" && (
-                      <DropdownMenuItem onClick={() => navigate("/my-tickets")}>
-                        <Ticket className="mr-2 h-4 w-4" />
-                        <span>My Tickets</span>
-                      </DropdownMenuItem>
-                    )}
+                    {userRole !== "organizer" &&
+                      userRole !== "admin" &&
+                      userRole !== "superadmin" && (
+                        <DropdownMenuItem
+                          onClick={() => navigate("/my-tickets")}
+                        >
+                          <Ticket className="mr-2 h-4 w-4" />
+                          <span>My Tickets</span>
+                        </DropdownMenuItem>
+                      )}
                     <DropdownMenuItem onClick={handleDashboardClick}>
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>

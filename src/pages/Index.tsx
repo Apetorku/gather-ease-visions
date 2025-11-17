@@ -20,24 +20,31 @@ const Index = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check initial auth state and role
-    const checkAuthAndRole = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const storedRole = localStorage.getItem("userRole");
-      
-      setIsLoggedIn(!!session || !!localStorage.getItem("userSession"));
-      setUserRole(storedRole);
-      setLoading(false);
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const storedSession = localStorage.getItem("userSession");
+        const storedRole = localStorage.getItem("userRole");
+        
+        const authenticated = !!(session || storedSession);
+        
+        setIsLoggedIn(authenticated);
+        setUserRole(storedRole);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        setIsLoggedIn(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    checkAuthAndRole();
+    checkAuth();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const storedSession = localStorage.getItem("userSession");
       const storedRole = localStorage.getItem("userRole");
+      
+      setIsLoggedIn(!!(session || storedSession));
       setUserRole(storedRole);
     });
 
@@ -45,7 +52,6 @@ const Index = () => {
   }, []);
 
   const handleDashboardClick = () => {
-    // Redirect based on user role
     if (userRole === "superadmin") {
       navigate("/superadmin");
     } else if (userRole === "admin") {
@@ -53,11 +59,28 @@ const Index = () => {
     } else if (userRole === "organizer") {
       navigate("/organizer-dashboard");
     } else {
-      navigate("/dashboard"); // Default to attendee dashboard
+      navigate("/dashboard");
     }
   };
+  
   return (
     <div className="min-h-screen gradient-subtle relative overflow-hidden perspective-1000">
+      {/* Auth Buttons */}
+      {!loading && !isLoggedIn && (
+        <div className="absolute top-8 right-8 z-50 flex items-center gap-3">
+          <Link to="/login">
+            <Button variant="ghost" size="sm">
+              Sign In
+            </Button>
+          </Link>
+          <Link to="/signup">
+            <Button variant="gradient" size="sm">
+              Sign Up
+            </Button>
+          </Link>
+        </div>
+      )}
+      
       {/* Gradient Orbs Background with Parallax */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] animate-glow-pulse parallax-layer-1" />
@@ -99,19 +122,19 @@ const Index = () => {
             </Link>
             {!loading &&
               (isLoggedIn ? (
-                <Button 
-                  variant="glass" 
-                  size="lg" 
+                <Button
+                  variant="glass"
+                  size="lg"
                   className="group"
                   onClick={handleDashboardClick}
                 >
-                  Go to Dashboard
+                  Click Here To Get Started
                   <LayoutDashboard className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
                 </Button>
               ) : (
                 <Link to="/signup">
                   <Button variant="glass" size="lg">
-                    Start Organizing
+                    Click Here To Get Started
                   </Button>
                 </Link>
               ))}
@@ -224,9 +247,13 @@ const Index = () => {
                   </Button>
                 </Link>
               ) : (
-                <Button variant="gradient" size="lg" onClick={handleDashboardClick}>
+                <Button
+                  variant="gradient"
+                  size="lg"
+                  onClick={handleDashboardClick}
+                >
                   <LayoutDashboard className="w-5 h-5 mr-2" />
-                  Go to Dashboard
+                  Click Here To Get Started
                 </Button>
               )
             ) : (
