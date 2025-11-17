@@ -57,12 +57,12 @@ const Index = () => {
     }
   };
   return (
-    <div className="min-h-screen gradient-subtle relative overflow-hidden">
-      {/* Gradient Orbs Background */}
+    <div className="min-h-screen gradient-subtle relative overflow-hidden perspective-1000">
+      {/* Gradient Orbs Background with Parallax */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] animate-glow-pulse" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/20 rounded-full blur-[120px] animate-glow-pulse animation-delay-700" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/15 rounded-full blur-[100px] animate-float" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] animate-glow-pulse parallax-layer-1" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/20 rounded-full blur-[120px] animate-glow-pulse animation-delay-700 parallax-layer-2" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/15 rounded-full blur-[100px] float-3d parallax-layer-1" />
       </div>
 
       {/* Hero Section */}
@@ -73,7 +73,7 @@ const Index = () => {
           transition={{ duration: 0.6 }}
           className="text-center max-w-4xl mx-auto"
         >
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-card elevation-2 mb-8 hover-lift">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-card elevation-3 mb-8 hover-lift glow-3d shadow-deep">
             <Sparkles className="w-4 h-4 text-secondary animate-pulse" />
             <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Welcome to the Future of Events
@@ -123,14 +123,14 @@ const Index = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mt-16 relative"
+          className="mt-16 relative parallax-layer-3"
         >
           <div className="relative max-w-5xl mx-auto perspective-1000">
-            <div className="glass-card p-2 transform hover:scale-[1.02] transition-transform duration-500">
+            <div className="glass-card p-2 card-3d elevation-4 shadow-deep glow-3d hover-lift">
               <img
                 src={heroImage}
                 alt="GatherEase Dashboard Preview"
-                className="rounded-2xl w-full shadow-2xl"
+                className="rounded-2xl w-full"
               />
             </div>
           </div>
@@ -153,7 +153,7 @@ const Index = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 perspective-1000">
           {[
             {
               icon: Calendar,
@@ -187,9 +187,9 @@ const Index = () => {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
             >
-              <div className="glass-card p-8 h-full hover:scale-105 transition-transform duration-300 group">
+              <div className="glass-card p-8 h-full card-3d elevation-3 shadow-deep glow-3d hover-lift group">
                 <div
-                  className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-4`}
+                  className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-4 shadow-glow-sm`}
                 >
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
@@ -207,7 +207,7 @@ const Index = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="glass-card p-12 text-center max-w-3xl mx-auto"
+          className="glass-card p-12 text-center max-w-3xl mx-auto card-3d elevation-4 shadow-deep glow-3d hover-lift"
         >
           <h2 className="text-4xl font-bold mb-4">
             Ready to Transform Your Events?
