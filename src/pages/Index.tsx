@@ -57,12 +57,12 @@ const Index = () => {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/10 to-secondary/10 relative overflow-hidden">
-      {/* Fintech AI Gradient Orbs with Glow */}
+    <div className="min-h-screen gradient-subtle relative overflow-hidden">
+      {/* Gradient Orbs Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/30 rounded-full blur-[120px] animate-pulse glow-primary" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/30 rounded-full blur-[120px] animate-pulse delay-700 glow-secondary" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[100px] float-animation" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] animate-glow-pulse" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/20 rounded-full blur-[120px] animate-glow-pulse animation-delay-700" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/15 rounded-full blur-[100px] animate-float" />
       </div>
 
       {/* Hero Section */}
