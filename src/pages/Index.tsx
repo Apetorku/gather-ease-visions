@@ -149,10 +149,15 @@ const Index = () => {
           className="mt-16 relative parallax-layer-3"
         >
           <div className="relative max-w-5xl mx-auto perspective-1000">
-            <div className="glass-card p-2 card-3d elevation-4 shadow-deep glow-3d hover-lift">
-              <div className="rounded-2xl w-full aspect-[16/9] overflow-hidden">
+            {/* Laptop Frame */}
+            <div className="relative glass-card p-8 card-3d elevation-4 shadow-deep glow-3d hover-lift">
+              {/* Laptop Screen */}
+              <div className="relative bg-background/95 rounded-xl overflow-hidden border-4 border-border/50">
                 <EventImageCarousel />
               </div>
+              
+              {/* Laptop Base */}
+              <div className="mt-2 h-6 bg-gradient-to-b from-border/30 to-transparent rounded-b-3xl" />
             </div>
           </div>
         </motion.div>
