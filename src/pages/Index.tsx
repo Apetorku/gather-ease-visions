@@ -149,15 +149,27 @@ const Index = () => {
           className="mt-16 relative parallax-layer-3"
         >
           <div className="relative max-w-5xl mx-auto perspective-1000">
-            {/* Laptop Frame */}
-            <div className="relative glass-card p-8 card-3d elevation-4 shadow-deep glow-3d hover-lift">
-              {/* Laptop Screen */}
-              <div className="relative bg-background/95 rounded-xl overflow-hidden border-4 border-border/50">
-                <EventImageCarousel />
+            {/* Laptop Mockup */}
+            <div className="relative">
+              {/* Screen Bezel */}
+              <div className="relative bg-gradient-to-b from-muted/80 to-muted/60 p-6 rounded-t-3xl shadow-2xl card-3d elevation-4 glow-3d hover-lift">
+                {/* Webcam */}
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-muted-foreground/20" />
+                
+                {/* Screen */}
+                <div className="relative bg-background rounded-xl overflow-hidden shadow-inner border border-border/30">
+                  <EventImageCarousel />
+                </div>
               </div>
               
-              {/* Laptop Base */}
-              <div className="mt-2 h-6 bg-gradient-to-b from-border/30 to-transparent rounded-b-3xl" />
+              {/* Laptop Base/Keyboard */}
+              <div className="relative h-8 bg-gradient-to-b from-muted/60 to-muted/40 rounded-b-3xl shadow-2xl">
+                {/* Hinge Shadow */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-b from-background/20 to-transparent" />
+                
+                {/* Trackpad Area */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-3 rounded-lg bg-background/10 border border-border/20" />
+              </div>
             </div>
           </div>
         </motion.div>
