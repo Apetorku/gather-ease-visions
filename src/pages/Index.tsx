@@ -9,9 +9,9 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import heroImage from "@/assets/hero-bg.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { EventImageCarousel } from "@/components/EventImageCarousel";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -150,11 +150,9 @@ const Index = () => {
         >
           <div className="relative max-w-5xl mx-auto perspective-1000">
             <div className="glass-card p-2 card-3d elevation-4 shadow-deep glow-3d hover-lift">
-              <img
-                src={heroImage}
-                alt="GatherEase Dashboard Preview"
-                className="rounded-2xl w-full"
-              />
+              <div className="rounded-2xl w-full aspect-[16/9] overflow-hidden">
+                <EventImageCarousel />
+              </div>
             </div>
           </div>
         </motion.div>
